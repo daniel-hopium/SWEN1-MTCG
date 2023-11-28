@@ -37,7 +37,7 @@ namespace TradingCardGame.NET
                 if(i == 0)
                 {
                     string[] inc = lines[0].Split(' ');
-                    Method = inc[0];
+                    Method = inc[0].ToUpper(); // TO UPPER NEEDED?
                     Path = inc[1];
                 }
                 else if(inheaders)

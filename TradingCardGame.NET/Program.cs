@@ -1,4 +1,6 @@
-﻿namespace TradingCardGame.NET
+﻿using TradingCardGame.NET.Controller;
+
+namespace TradingCardGame.NET
 {
     internal class Program
     {
@@ -10,7 +12,7 @@
         /// <param name="args">Arguments.</param>
         static void Main(string[] args)
         {
-            HttpSvr svr = new();
+            HttpSvr svr = new HttpSvr();
             svr.Incoming += _ProcessMesage;
 
             svr.Run();
@@ -22,9 +24,44 @@
         /// <param name="e">Event arguments.</param>
         private static void _ProcessMesage(object sender, HttpSvrEventArgs e)
         {
-            Console.WriteLine(e.PlainMessage);
+            
+            //if startswith ...........
 
-            e.Reply(200, "Yo! Understood.");
+            if (e.Path.StartsWith("/users") || e.Path.StartsWith("/sessions"))
+            {
+                UserController userController = new UserController();
+                userController.ProcessRequest(sender, e);
+
+            }
+            else if (e.Path.StartsWith("/packages") || e.Path.StartsWith("/transactions"))
+            {
+            
+            }
+            else if (e.Path.StartsWith("/cards") || e.Path.StartsWith("/deck"))
+            {
+                
+            }
+            else if (e.Path.StartsWith("/stats") || e.Path.StartsWith("/scoreboard")|| e.Path.StartsWith("/battles"))
+            {
+                
+            }
+            else if (e.Path.StartsWith("/tradings"))
+            {
+                
+            }
+            
+            /*switch (e.Path)
+            {
+                case "/":
+                    e.Reply(200, "Hello World!");
+                    return;
+                case "/cards":
+                    e.Reply(400, "CardsValue");
+                    return;
+                default:
+                    e.Reply(200, "Yo! Understood.");
+                    break;
+            }*/
         }
     }
 }
