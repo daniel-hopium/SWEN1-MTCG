@@ -8,6 +8,8 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <Folder Include="config\" />
+      <Folder Include="mapper\" />
       <Folder Include="sampleStructure\main\config\" />
       <Folder Include="sampleStructure\main\controller\" />
       <Folder Include="sampleStructure\main\exception\" />
@@ -20,7 +22,10 @@
       <Folder Include="sampleStructure\test\component\" />
       <Folder Include="sampleStructure\test\integration\" />
       <Folder Include="sampleStructure\test\unit\" />
-      <Folder Include="utils\" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Accelergreat.EntityFramework.PostgreSql" Version="2.2.7" />
     </ItemGroup>
 
 </Project>
