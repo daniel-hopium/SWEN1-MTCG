@@ -25,8 +25,6 @@ namespace TradingCardGame.NET
         private static void _ProcessMesage(object sender, HttpSvrEventArgs e)
         {
             
-            //if startswith ...........
-
             if (e.Path.StartsWith("/users") || e.Path.StartsWith("/sessions"))
             {
                 UserController userController = new UserController();
@@ -35,33 +33,26 @@ namespace TradingCardGame.NET
             }
             else if (e.Path.StartsWith("/packages") || e.Path.StartsWith("/transactions"))
             {
-            
+                PackageController packageController = new PackageController();
+                packageController.ProcessRequest(sender, e);
             }
             else if (e.Path.StartsWith("/cards") || e.Path.StartsWith("/deck"))
             {
-                
+                CardsController cardsController = new CardsController();
+                cardsController.ProcessRequest(sender, e);
+
             }
             else if (e.Path.StartsWith("/stats") || e.Path.StartsWith("/scoreboard")|| e.Path.StartsWith("/battles"))
             {
-                
+                GameController gameController = new GameController();
+                gameController.ProcessRequest(sender, e);
             }
             else if (e.Path.StartsWith("/tradings"))
             {
+                TradingController tradingController = new TradingController();
+                tradingController.ProcessRequest(sender, e);
                 
             }
-            
-            /*switch (e.Path)
-            {
-                case "/":
-                    e.Reply(200, "Hello World!");
-                    return;
-                case "/cards":
-                    e.Reply(400, "CardsValue");
-                    return;
-                default:
-                    e.Reply(200, "Yo! Understood.");
-                    break;
-            }*/
         }
     }
 }
