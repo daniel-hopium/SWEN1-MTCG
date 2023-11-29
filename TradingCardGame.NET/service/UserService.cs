@@ -11,10 +11,11 @@ public class UserService
     
     public void CreateUser(User user)
     {
-        Console.WriteLine("User Created:");
-        Console.WriteLine("Username: " + user.username);
-        Console.WriteLine("Password: " + user.password);
+        // Console.WriteLine("User Created:");
+        // Console.WriteLine("Username: " + user.username);
+        // Console.WriteLine("Password: " + user.password);
         _userRepository.AddUser(user);
+        
     }
 
     public void UpdateUser(User user)

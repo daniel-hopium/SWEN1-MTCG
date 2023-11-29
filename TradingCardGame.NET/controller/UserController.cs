@@ -73,6 +73,7 @@ public class UserController
 
     private void CreateUser(HttpSvrEventArgs e)
     {
+        
         JsonDocument jsonDocument = JsonDocument.Parse(e.Payload);
         JsonElement root = jsonDocument.RootElement;
         
@@ -81,7 +82,16 @@ public class UserController
         Console.WriteLine(e.Payload);
         user.username = root.GetProperty("username").GetString();
         user.password = root.GetProperty("password").GetString();
-        _userService.CreateUser(user);
+        try
+        {
+            _userService.CreateUser(user);
+        }
+        catch (Exception exception)
+        {
+            Console.WriteLine(exception);
+            e.Reply(400, "Username already exists");
+            return;
+        }
         e.Reply(201, "User successfully created");
     }
     

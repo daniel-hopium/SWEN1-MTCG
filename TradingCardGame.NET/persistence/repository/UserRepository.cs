@@ -71,22 +71,31 @@ public class UserRepository
 
     public void AddUser(User user)
     {
-        using (NpgsqlConnection conn = new NpgsqlConnection(_connectionString))
+        try
         {
-            conn.Open();
-
-            string sql = "INSERT INTO users (username, password) VALUES (@username, @password)";
-
-            using (NpgsqlCommand cmd = new NpgsqlCommand(sql, conn))
+            using (NpgsqlConnection conn = new NpgsqlConnection(_connectionString))
             {
-                cmd.Parameters.AddWithValue("username", user.username);
-                cmd.Parameters.AddWithValue("password", user.password);
+                conn.Open();
 
-                cmd.ExecuteNonQuery();
-                Console.WriteLine("SUCCESSUFLLY CRAETED YOO!");
+                string sql = "INSERT INTO users (username, password) VALUES (@username, @password)";
+
+                using (NpgsqlCommand cmd = new NpgsqlCommand(sql, conn))
+                {
+                    cmd.Parameters.AddWithValue("@username", user.username);
+                    cmd.Parameters.AddWithValue("@password", user.password);
+
+                    cmd.ExecuteNonQuery();
+                }
             }
         }
+        catch (Npgsql.PostgresException ex) when (ex.SqlState == "23505") // Unique violation
+        {
+            throw new UserAlreadyExistsException("Username already exists.");
+            Console.WriteLine("Error: Username already exists.");
+        }
     }
+
+
 
     // Add additional methods for update and delete as needed
 

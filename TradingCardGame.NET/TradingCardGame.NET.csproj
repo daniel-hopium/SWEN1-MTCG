@@ -8,8 +8,6 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <Folder Include="config\" />
-      <Folder Include="mapper\" />
       <Folder Include="sampleStructure\main\config\" />
       <Folder Include="sampleStructure\main\controller\" />
       <Folder Include="sampleStructure\main\exception\" />
@@ -26,6 +24,7 @@
 
     <ItemGroup>
       <PackageReference Include="Accelergreat.EntityFramework.PostgreSql" Version="2.2.7" />
+      <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     </ItemGroup>
 
 </Project>
