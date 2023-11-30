@@ -111,17 +111,7 @@ namespace API.HttpServer
         {
             string data;
 
-            switch(status)
-            {
-                case 200:
-                    data = "HTTP/1.1 200 OK\n"; break;
-                case 400:
-                    data = "HTTP/1.1 400 Bad Request\n"; break;
-                case 404:
-                    data = "HTTP/1.1 404 Not Found\n"; break;
-                default:
-                    data = "HTTP/1.1 418 I'm a Teapot\n"; break;
-            }
+            data = GetHttpResponseStatus(status);
             
             if(string.IsNullOrEmpty(payload)) 
             {
@@ -136,5 +126,27 @@ namespace API.HttpServer
             _Client.Close();
             _Client.Dispose();
         }
+        
+        public static string GetHttpResponseStatus(int statusCode)
+        {
+            string statusLine = statusCode switch
+            {
+                200 => "HTTP/1.1 200 OK",
+                201 => "HTTP/1.1 201 Created",
+                204 => "HTTP/1.1 204 No Content",
+                400 => "HTTP/1.1 400 Bad Request",
+                401 => "HTTP/1.1 401 Unauthorized",
+                403 => "HTTP/1.1 403 Forbidden",
+                404 => "HTTP/1.1 404 Not Found",
+                500 => "HTTP/1.1 500 Internal Server Error",
+                501 => "HTTP/1.1 501 Not Implemented",
+                503 => "HTTP/1.1 503 Service Unavailable",
+                _ => "HTTP/1.1 418 I'm a Teapot"
+            };
+
+            return statusLine + "\n";
+        }
+
     }
+    
 }
