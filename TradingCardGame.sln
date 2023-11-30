@@ -1,6 +1,12 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TradingCardGame.NET", "TradingCardGame.NET\TradingCardGame.NET.csproj", "{5CDC8CD4-3DDB-4B99-9CD2-36CDAB0458EA}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Api", "Api\Api.csproj", "{5CDC8CD4-3DDB-4B99-9CD2-36CDAB0458EA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BusinessLogic", "BusinessLogic\BusinessLogic.csproj", "{F9C163D2-210D-44F4-BEB3-5C4F4BB137FC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataAccess", "DataAccess\DataAccess.csproj", "{DD501437-54EE-459A-908F-1310D33DDEA2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Transversal", "Transversal\Transversal.csproj", "{98B01247-FBE6-4E26-98BE-3E4EFD432488}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -12,5 +18,17 @@ Global
 		{5CDC8CD4-3DDB-4B99-9CD2-36CDAB0458EA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5CDC8CD4-3DDB-4B99-9CD2-36CDAB0458EA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5CDC8CD4-3DDB-4B99-9CD2-36CDAB0458EA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F9C163D2-210D-44F4-BEB3-5C4F4BB137FC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F9C163D2-210D-44F4-BEB3-5C4F4BB137FC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F9C163D2-210D-44F4-BEB3-5C4F4BB137FC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F9C163D2-210D-44F4-BEB3-5C4F4BB137FC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DD501437-54EE-459A-908F-1310D33DDEA2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DD501437-54EE-459A-908F-1310D33DDEA2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DD501437-54EE-459A-908F-1310D33DDEA2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DD501437-54EE-459A-908F-1310D33DDEA2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{98B01247-FBE6-4E26-98BE-3E4EFD432488}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{98B01247-FBE6-4E26-98BE-3E4EFD432488}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{98B01247-FBE6-4E26-98BE-3E4EFD432488}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{98B01247-FBE6-4E26-98BE-3E4EFD432488}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
