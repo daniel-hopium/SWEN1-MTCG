@@ -1,5 +1,4 @@
-﻿using NpgsqlTypes;
-using TradingCardGame.NET.persistence.entity;
+﻿using TradingCardGame.NET.persistence.entity;
 
 namespace TradingCardGame.NET.persistence.repository;
 
@@ -9,25 +8,15 @@ using Npgsql;
 
 public class UserRepository
 {
-    private readonly string _connectionString = "Host=127.0.0.1;Port=5432;Username=postgres;Password=postgres;Database=postgres";
-    
-
-    public UserRepository(string connectionString)
-    {
-        _connectionString = connectionString;
-    }
 
     public List<User> GetAllUsers()
     {
         List<User> users = new List<User>();
 
-        using (NpgsqlConnection conn = new NpgsqlConnection(_connectionString))
+        try
         {
-            conn.Open();
-
-            string sql = "SELECT * FROM users";
-
-            using (NpgsqlCommand cmd = new NpgsqlCommand(sql, conn))
+            // Use the existing connection from the DatabaseManager
+            using (NpgsqlCommand cmd = new NpgsqlCommand("SELECT * FROM users", DatabaseManager.DbConnection))
             {
                 using (NpgsqlDataReader reader = cmd.ExecuteReader())
                 {
@@ -39,22 +28,23 @@ public class UserRepository
                 }
             }
         }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error getting all users: {ex.Message}");
+        }
 
         return users;
     }
 
-    public User GetUserById(int userId)
+
+    public User GetUserByUsername(string username)
     {
-        using (NpgsqlConnection conn = new NpgsqlConnection(_connectionString))
+        try
         {
-            conn.Open();
-
-            string sql = "SELECT * FROM users WHERE id = @userId";
-
-            using (NpgsqlCommand cmd = new NpgsqlCommand(sql, conn))
+            // Use the existing connection from the DatabaseManager
+            using (NpgsqlCommand cmd = new NpgsqlCommand("SELECT * FROM users WHERE username = @username", DatabaseManager.DbConnection))
             {
-                cmd.Parameters.Add(new NpgsqlParameter("userId", NpgsqlDbType.Integer));
-                // cmd.Parameters["userId"].Value = userId;
+                cmd.Parameters.AddWithValue("@username", username);
 
                 using (NpgsqlDataReader reader = cmd.ExecuteReader())
                 {
@@ -65,48 +55,78 @@ public class UserRepository
                 }
             }
         }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error fetching user by username: {ex.Message}");
+        }
 
-        return null; // User not found
+        return null; 
     }
+
 
     public void AddUser(User user)
     {
         try
         {
-            using (NpgsqlConnection conn = new NpgsqlConnection(_connectionString))
+            // Use the existing connection from the DatabaseManager
+            using (NpgsqlCommand cmd = new NpgsqlCommand("INSERT INTO users (username, password) VALUES (@username, @password)", DatabaseManager.DbConnection))
             {
-                conn.Open();
+                cmd.Parameters.AddWithValue("@username", user.Username);
+                cmd.Parameters.AddWithValue("@password", user.Password);
 
-                string sql = "INSERT INTO users (username, password) VALUES (@username, @password)";
-
-                using (NpgsqlCommand cmd = new NpgsqlCommand(sql, conn))
-                {
-                    cmd.Parameters.AddWithValue("@username", user.username);
-                    cmd.Parameters.AddWithValue("@password", user.password);
-
-                    cmd.ExecuteNonQuery();
-                }
+                cmd.ExecuteNonQuery();
             }
         }
-        catch (Npgsql.PostgresException ex) when (ex.SqlState == "23505") // Unique violation
+        catch (PostgresException ex) when (ex.SqlState == "23505") // Unique violation
         {
             throw new UserAlreadyExistsException("Username already exists.");
-            Console.WriteLine("Error: Username already exists.");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error adding user: {ex.Message}");
         }
     }
-
-
-
+    
     // Add additional methods for update and delete as needed
 
     private User MapUserFromDataReader(NpgsqlDataReader reader)
     {
         return new User
         {
-            bio = reader["bio"].ToString(),
-            username = reader["username"].ToString(),
-            password = reader["password"].ToString(),
+            Bio = reader["bio"].ToString(),
+            Username = reader["username"].ToString(),
+            Password = reader["password"].ToString(),
+            Image = reader["image"].ToString(),
             // Add other properties as needed
         };
     }
+
+    public User UpdateUser(User user)
+    {
+        try
+        {
+            // Use the existing connection from the DatabaseManager
+            using (NpgsqlCommand cmd = new NpgsqlCommand("UPDATE users SET bio = @bio, image = @image WHERE username = @username RETURNING *", DatabaseManager.DbConnection))
+            {
+                cmd.Parameters.AddWithValue("@username", user.Username);
+                cmd.Parameters.AddWithValue("@bio", user.Bio);
+                cmd.Parameters.AddWithValue("@image", user.Image);
+
+                using (NpgsqlDataReader reader = cmd.ExecuteReader())
+                {
+                    if (reader.Read())
+                    {
+                        return MapUserFromDataReader(reader);
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error updating user: {ex.Message}");
+        }
+
+        return null; // Return null if the update fails or an error occurs
+    }
+
 }

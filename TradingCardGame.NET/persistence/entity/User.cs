@@ -2,15 +2,15 @@
 
 public class User
 {
-    public string username { get; set; }
-    public string password { get; set; }
-    public string name { get; set; }
-    public string bio { get; set; }
-    public string image { get; set; }
+    public string? Username { get; set; }
+    public string? Password { get; set; }
+    public string? Name { get; set; }
+    public string? Bio { get; set; }
+    public string? Image { get; set; }
     
     public override string ToString()
     {
-        return $"Username: {username}, Name: {name}, Bio: {bio}, Image: {image}";
+        return $"Username: {Username}, Name: {Name}, Bio: {Bio}, Image: {Image}";
     }
     
 }

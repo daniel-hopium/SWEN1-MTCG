@@ -13,9 +13,11 @@ namespace TradingCardGame.NET
         static void Main(string[] args)
         {
             HttpSvr svr = new HttpSvr();
+            DatabaseManager.OpenDatabaseConnection();
             svr.Incoming += _ProcessMesage;
 
             svr.Run();
+            DatabaseManager.CloseDatabaseConnection();
         }
 
 

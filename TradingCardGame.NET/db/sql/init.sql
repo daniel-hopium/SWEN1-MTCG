@@ -7,7 +7,8 @@ CREATE TABLE IF NOT EXISTS users (
     username    VARCHAR(255)    NOT NULL UNIQUE,
     password    VARCHAR(255)    NOT NULL,
     name        VARCHAR(50)     ,
-    image       Varchar(50)     
+    image       Varchar(50)     ,
+    bio         TEXT            
     
 );
 

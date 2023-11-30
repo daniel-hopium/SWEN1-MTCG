@@ -1,6 +1,5 @@
-﻿using System.Data;
-using System.Reflection.Metadata.Ecma335;
-using System.Text.Json;
+﻿using System.Text.Json;
+using Newtonsoft.Json;
 using TradingCardGame.NET.persistence.entity;
 using TradingCardGame.NET.service;
 using TradingCardGame.NET.utils;
@@ -40,35 +39,28 @@ public class UserController
 
     private void UpdateUserData(HttpSvrEventArgs e)
     {
-        User user = new User();
+        User user = JsonConvert.DeserializeObject<User>(e.Payload);
+        user.Username = _utils.PathVariable(e.Path);
+        
+        // JsonDocument jsonDocument = JsonDocument.Parse(e.Payload);
+        // JsonElement root = jsonDocument.RootElement;
+        //
+        // user.username = pathVariable;
+        // user.name = root.GetProperty("name").GetString(); // FIX NULLABLE
+        // user.bio = root.GetProperty("bio").GetString();
+        // user.image = root.GetProperty("image").GetString();
 
-        string pathVariable = _utils.PathVariable(e.Path);
-        Console.WriteLine("PATHSEGMENT " + pathVariable);
+        var updatedUser = _userService.UpdateUser(user);
         
-        JsonDocument jsonDocument = JsonDocument.Parse(e.Payload);
-        JsonElement root = jsonDocument.RootElement;
-        
-        user.username = pathVariable;
-        user.name = root.GetProperty("name").GetString(); // FIX NULLABLE
-        user.bio = root.GetProperty("bio").GetString();
-        user.image = root.GetProperty("image").GetString();
-
-        _userService.UpdateUser(user);
-        
-        
-        e.Reply(200, "Successfully updated data");
+        e.Reply(200, JsonConvert.SerializeObject(updatedUser));
     }
 
     private void GetUserData(HttpSvrEventArgs e)
     {
         string username = _utils.PathVariable(e.Path);
-        
-        JsonDocument jsonDocument = JsonDocument.Parse(e.Payload);
-        JsonElement root = jsonDocument.RootElement;
 
-        _userService.GetData(username);
-        
-        e.Reply(200, "DATA");
+        var updatedUser = _userService.GetData(username);
+        e.Reply(200, JsonConvert.SerializeObject(updatedUser));
     }
 
     private void CreateUser(HttpSvrEventArgs e)
@@ -80,8 +72,8 @@ public class UserController
         User user = new User();
         
         Console.WriteLine(e.Payload);
-        user.username = root.GetProperty("username").GetString();
-        user.password = root.GetProperty("password").GetString();
+        user.Username = root.GetProperty("username").GetString();
+        user.Password = root.GetProperty("password").GetString();
         try
         {
             _userService.CreateUser(user);
@@ -94,6 +86,5 @@ public class UserController
         }
         e.Reply(201, "User successfully created");
     }
-    
     
 }
