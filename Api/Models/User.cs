@@ -1,4 +1,4 @@
-﻿namespace TradingCardGame.NET.persistence.entity;
+﻿namespace API.Models;
 
 public class User
 {
