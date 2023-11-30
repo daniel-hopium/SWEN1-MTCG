@@ -2,7 +2,7 @@
 using System.Net.Sockets;
 using System.Text;
 
-namespace TradingCardGame.NET
+namespace API.HttpServer
 {
     /// <summary>This class implements a HTTP server.</summary>
     public sealed class HttpSvr

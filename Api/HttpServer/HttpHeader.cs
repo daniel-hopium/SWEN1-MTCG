@@ -1,4 +1,6 @@
-﻿namespace TradingCardGame.NET
+﻿using System;
+
+namespace API.HttpServer
 {
     /// <summary>This class represents a HTTP header.</summary>
     public class HttpHeader
@@ -15,7 +17,7 @@
                 Name  = header.Substring(0, n).Trim();
                 Value = header.Substring(n + 1).Trim();
             }
-            catch(Exception) {}
+            catch(System.Exception) {}
         }
 
 

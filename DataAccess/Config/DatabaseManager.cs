@@ -1,10 +1,11 @@
 ﻿using System.Data;
 using Npgsql;
 
+namespace DataAccess.Config;
 public class DatabaseManager
 {
     private const string ConnectionString = "Host=127.0.0.1;Port=5432;Username=postgres;Password=postgres;Database=postgres";
-    private static NpgsqlConnection _dbConnection;
+    private static NpgsqlConnection? _dbConnection;
 
     // Private constructor to enforce singleton pattern
     private DatabaseManager()
@@ -38,9 +39,10 @@ public class DatabaseManager
     // Method to close the database connection
     public static void CloseDatabaseConnection()
     {
-        if (_dbConnection != null && _dbConnection.State == ConnectionState.Open)
+        if (_dbConnection is { State: ConnectionState.Open })
         {
             _dbConnection.Close();
+            _dbConnection.Dispose();
         }
     }
 }

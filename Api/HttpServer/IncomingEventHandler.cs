@@ -1,4 +1,4 @@
-﻿namespace TradingCardGame.NET
+﻿namespace API.HttpServer
 {
     /// <summary>Implements an event handler for Incoming HTTP events.</summary>
     /// <param name="sender">Sender.</param>

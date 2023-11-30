@@ -1,7 +1,7 @@
 ﻿using System.Net.Sockets;
 using System.Text;
 
-namespace TradingCardGame.NET
+namespace API.HttpServer
 {
     /// <summary>This class provides HTTP server event arguments.</summary>
     public class HttpSvrEventArgs: EventArgs
