@@ -146,6 +146,16 @@ namespace API.HttpServer
 
             return statusLine + "\n";
         }
+        
+        public string PathVariable()
+        {
+            string[] pathSegments = Path.Split("/");
+            if (pathSegments.Length < 2 || pathSegments.Length > 4)
+            {
+                throw new Exception("Invalid Path Variable Format");
+            }
+            return  pathSegments[2]; 
+        }
 
     }
     

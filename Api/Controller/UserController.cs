@@ -1,10 +1,8 @@
-﻿using System.Text.Json;
-using API.HttpServer;
+﻿using API.HttpServer;
 using Api.Utils;
 using BusinessLogic.Services;
 using Newtonsoft.Json;
 using Transversal.Entities;
-
 
 namespace API.Controller
 {
@@ -34,58 +32,56 @@ namespace API.Controller
             }
         }
 
-        private void Login(HttpSvrEventArgs httpSvrEventArgs)
+        private void Login(HttpSvrEventArgs e)
         {
-            throw new NotImplementedException();
+            User user = JsonConvert.DeserializeObject<User>(e.Payload);
+
+            if (_userService.Login(user))
+            {
+                e.Reply(200, "Successfully logged in");
+            }
+            else
+            {
+                e.Reply(400, "Username or Password is wrong");
+            }
         }
 
         private void UpdateUserData(HttpSvrEventArgs e)
         {
             User user = JsonConvert.DeserializeObject<User>(e.Payload);
-            user.Username = _utils.PathVariable(e.Path);
+            user!.Username = e.PathVariable();
             
-            // JsonDocument jsonDocument = JsonDocument.Parse(e.Payload);
-            // JsonElement root = jsonDocument.RootElement;
-            //
-            // user.username = pathVariable;
-            // user.name = root.GetProperty("name").GetString(); // FIX NULLABLE
-            // user.bio = root.GetProperty("bio").GetString();
-            // user.image = root.GetProperty("image").GetString();
-
+            if (!_userService.UserExists(user.Username))
+            {
+                e.Reply(400, "User not found");
+                return;
+            }
+            
             var updatedUser = _userService.UpdateUser(user);
-            
             e.Reply(200, JsonConvert.SerializeObject(updatedUser));
         }
 
         private void GetUserData(HttpSvrEventArgs e)
         {
-            string username = _utils.PathVariable(e.Path);
-
-            var updatedUser = _userService.GetData(username);
-            e.Reply(200, JsonConvert.SerializeObject(updatedUser));
+            var updatedUser = _userService.GetUser(e.PathVariable());
+            
+            if (updatedUser.Username == null)
+                e.Reply(400, "User not found");
+            else
+                e.Reply(200, JsonConvert.SerializeObject(updatedUser));
         }
 
         private void CreateUser(HttpSvrEventArgs e)
         {
+            User user = JsonConvert.DeserializeObject<User>(e.Payload);
+            Console.WriteLine(user);
+            // if (_userService.UserExists(user.Username))
+            // {
+            //     e.Reply(400, "Username already taken");
+            //     return;
+            // }
             
-            JsonDocument jsonDocument = JsonDocument.Parse(e.Payload);
-            JsonElement root = jsonDocument.RootElement;
-            
-            User user = new User();
-            
-            Console.WriteLine(e.Payload);
-            user.Username = root.GetProperty("username").GetString();
-            user.Password = root.GetProperty("password").GetString();
-            try
-            {
-                _userService.CreateUser(user);
-            }
-            catch (Exception exception)
-            {
-                Console.WriteLine(exception);
-                e.Reply(400, "Username already exists");
-                return;
-            }
+            _userService.CreateUser(user);
             e.Reply(201, "User successfully created");
         }
         

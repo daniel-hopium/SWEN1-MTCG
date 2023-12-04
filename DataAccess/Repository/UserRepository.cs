@@ -6,21 +6,14 @@ namespace DataAccess.Repository
 {
     public class UserRepository
     {
-        public UserRepository()
-        {
-            DatabaseManager.OpenDatabaseConnection();
-        }
         
-        ~UserRepository()
-        {
-            DatabaseManager.CloseDatabaseConnection();
-        }
         public List<UserDao> GetAllUsers()
         {
             List<UserDao> users = new List<UserDao>();
 
             try
             {
+                DatabaseManager.OpenDatabaseConnection();
                 // Use the existing connection from the DatabaseManager
                 using (NpgsqlCommand cmd = new NpgsqlCommand("SELECT * FROM users", DatabaseManager.DbConnection))
                 {
@@ -33,6 +26,7 @@ namespace DataAccess.Repository
                         }
                     }
                 }
+                DatabaseManager.CloseDatabaseConnection();
             }
             catch (Exception ex)
             {
@@ -43,11 +37,11 @@ namespace DataAccess.Repository
         }
 
 
-        public UserDao GetUserByUsername(string username)
+        public UserDao? GetUserByUsername(string username)
         {
             try
             {
-                
+                DatabaseManager.OpenDatabaseConnection();
                 // Use the existing connection from the DatabaseManager
                 using (NpgsqlCommand cmd = new NpgsqlCommand("SELECT * FROM users WHERE username = @username", DatabaseManager.DbConnection))
                 {
@@ -61,6 +55,7 @@ namespace DataAccess.Repository
                         }
                     }
                 }
+                DatabaseManager.CloseDatabaseConnection();
             }
             catch (Exception ex)
             {
@@ -71,8 +66,9 @@ namespace DataAccess.Repository
         }
 
 
-        public void AddUser(UserDao userDao)
+        public void CreateUser(UserDao userDao)
         {
+            DatabaseManager.OpenDatabaseConnection();
                 // Use the existing connection from the DatabaseManager
                 using (NpgsqlCommand cmd = new NpgsqlCommand("INSERT INTO users (username, password) VALUES (@username, @password)", DatabaseManager.DbConnection))
                 {
@@ -81,9 +77,9 @@ namespace DataAccess.Repository
 
                     cmd.ExecuteNonQuery();
                 }
+                DatabaseManager.CloseDatabaseConnection();
         }
         
-        // Add additional methods for update and delete as needed
 
         private UserDao MapUserFromDataReader(NpgsqlDataReader reader)
         {
@@ -101,6 +97,7 @@ namespace DataAccess.Repository
         {
             try
             {
+                DatabaseManager.OpenDatabaseConnection();
                 // Use the existing connection from the DatabaseManager
                 using (NpgsqlCommand cmd = new NpgsqlCommand("UPDATE users SET bio = @bio, image = @image WHERE username = @username RETURNING *", DatabaseManager.DbConnection))
                 {
@@ -116,6 +113,7 @@ namespace DataAccess.Repository
                         }
                     }
                 }
+                DatabaseManager.CloseDatabaseConnection();
             }
             catch (Exception ex)
             {
@@ -125,6 +123,21 @@ namespace DataAccess.Repository
             return null; // Return null if the update fails or an error occurs
         }
 
+        public bool UserExists(string username)
+        {
+            int count = 0;
+            DatabaseManager.OpenDatabaseConnection();
+            
+            using (NpgsqlCommand cmd = new NpgsqlCommand($"SELECT COUNT(*) FROM users WHERE username = @username",
+                       DatabaseManager.DbConnection))
+            {
+                cmd.Parameters.AddWithValue("@username", username);
+
+                count = Convert.ToInt32(cmd.ExecuteScalar());
+            }
+            DatabaseManager.CloseDatabaseConnection();
+            return count > 0;
+        }
     }
 
 }
