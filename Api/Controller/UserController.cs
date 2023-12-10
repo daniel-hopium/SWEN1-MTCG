@@ -34,15 +34,15 @@ namespace API.Controller
 
         private void Login(HttpSvrEventArgs e)
         {
-            User user = JsonConvert.DeserializeObject<User>(e.Payload);
+           var user = JsonConvert.DeserializeObject<User>(e.Payload);
 
             if (_userService.Login(user))
             {
-                e.Reply(200, "Successfully logged in");
+                e.Reply(200, $"{user.Username}-mtcgToken");
             }
             else
             {
-                e.Reply(400, "Username or Password is wrong");
+                e.Reply(401, "Invalid username or password provided");
             }
         }
 
@@ -53,7 +53,7 @@ namespace API.Controller
             
             if (!_userService.UserExists(user.Username))
             {
-                e.Reply(400, "User not found");
+                e.Reply(404, "User not found");
                 return;
             }
             
@@ -63,23 +63,31 @@ namespace API.Controller
 
         private void GetUserData(HttpSvrEventArgs e)
         {
-            var updatedUser = _userService.GetUser(e.PathVariable());
+            if (!_userService.UserExists(e.PathVariable()))
+            { 
+                e.Reply(404, "User not found");
+                return; 
+            }
             
-            if (updatedUser.Username == null)
-                e.Reply(400, "User not found");
-            else
-                e.Reply(200, JsonConvert.SerializeObject(updatedUser));
+            var updatedUser = _userService.GetUser(e.PathVariable());
+            e.Reply(200, JsonConvert.SerializeObject(updatedUser));
         }
 
         private void CreateUser(HttpSvrEventArgs e)
         {
-            User user = JsonConvert.DeserializeObject<User>(e.Payload);
-            Console.WriteLine(user);
-            // if (_userService.UserExists(user.Username))
-            // {
-            //     e.Reply(400, "Username already taken");
-            //     return;
-            // }
+            var user = JsonConvert.DeserializeObject<User>(e.Payload);
+            
+            if (user == null) 
+            {
+                e.Reply(400, "Invalid JSON format");
+                return;
+            }
+            
+            if (_userService.UserExists(user.Username))
+            {
+                e.Reply(409, "User with same username already registered");
+                return;
+            }
             
             _userService.CreateUser(user);
             e.Reply(201, "User successfully created");

@@ -29,13 +29,13 @@ namespace BusinessLogic.Services
         public bool Login(User user)
         {
             string password = user.Password;
-            User dbUser = UserMapper.MapToEntity(_userRepository.GetUserByUsername(user.Username));
+            var dbUser = UserMapper.MapToEntity(_userRepository.GetUserByUsername(user.Username));
             
-            if (dbUser.Username == null || dbUser.Password == null)
+            if (dbUser == null)
                 return false;
 
             return PasswordHasher.VerifyPassword(password, dbUser.Password);
-            // extend later
+            // extend later (token)
         }
 
         public bool UserExists(string username)
