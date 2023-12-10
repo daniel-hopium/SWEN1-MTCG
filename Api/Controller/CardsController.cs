@@ -28,7 +28,7 @@ namespace API.Controller
             }
         }
 
-        private void ConfigureDeck(HttpSvrEventArgs httpSvrEventArgs)
+        private void ConfigureDeck(HttpSvrEventArgs e)
         {
             throw new NotImplementedException();
         }

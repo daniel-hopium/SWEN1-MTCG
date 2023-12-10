@@ -1,5 +1,9 @@
 ﻿using API.HttpServer;
+using Api.Models;
+using Api.Utils;
 using BusinessLogic.Services;
+using Newtonsoft.Json;
+using Transversal.Entities;
 
 namespace API.Controller
 {
@@ -25,14 +29,25 @@ namespace API.Controller
             }
         }
 
-        private void BuyCardPackage(HttpSvrEventArgs httpSvrEventArgs)
+        private void BuyCardPackage(HttpSvrEventArgs e)
         {
             throw new NotImplementedException();
         }
 
-        private void CreatePackages(HttpSvrEventArgs httpSvrEventArgs)
+        private void CreatePackages(HttpSvrEventArgs e)
         {
-            throw new NotImplementedException();
+            if(Authorization.AuthorizeAdmin(e.Authorization))
+            {
+                var cards = JsonConvert.DeserializeObject<List<CardsDto>>(e.Payload);
+                _packageService.CreatePackage(cards);
+                e.Reply(200, "Package created");
+            }
+            else
+            {
+                e.Reply(401, "Unauthorized");
+            }
+            Console.WriteLine(e.PlainMessage);
+            e.Reply(200, "wda");
         }
     }   
 }
