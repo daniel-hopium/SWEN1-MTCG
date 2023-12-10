@@ -39,6 +39,13 @@ namespace API.HttpServer
                     string[] inc = lines[0].Split(' ');
                     Method = inc[0].ToUpper(); // TO UPPER NEEDED?
                     Path = inc[1];
+                    
+                }
+                if (i == 2)
+                {
+                    string[] inc = lines[i].Split(' ');
+                    if(inc[0].ToUpper() == "AUTHORIZATION:")
+                        Authorization = inc[1] + " " + inc[2];
                 }
                 else if(inheaders)
                 {
@@ -80,6 +87,12 @@ namespace API.HttpServer
 
         /// <summary>Gets the request path.</summary>
         public virtual string Path
+        {
+            get; protected set;
+        } = string.Empty;
+        
+        /// <summary>Gets the authorization.</summary>
+        public virtual string Authorization
         {
             get; protected set;
         } = string.Empty;
