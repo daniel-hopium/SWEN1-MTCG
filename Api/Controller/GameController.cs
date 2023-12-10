@@ -1,9 +1,17 @@
 ﻿using API.HttpServer;
+using BusinessLogic.Services;
 
 namespace API.Controller
 {
     public class GameController
     {
+        private GameService _gameService;
+        
+        public GameController(GameService gameService)
+        {
+            _gameService = gameService;
+        }
+        
         public void ProcessRequest(object sender, HttpSvrEventArgs e)
         {
             if (e.Path.Equals("/stats") && e.Method.Equals("GET"))

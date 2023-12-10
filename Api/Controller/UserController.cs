@@ -1,6 +1,7 @@
 ﻿using API.HttpServer;
 using Api.Utils;
 using BusinessLogic.Services;
+using DataAccess.Repository;
 using Newtonsoft.Json;
 using Transversal.Entities;
 
@@ -8,8 +9,13 @@ namespace API.Controller
 {
     public class UserController
     {
-        private UserService _userService = new UserService();
+        private UserService _userService;
         private Utils _utils = new Utils();
+        
+        public UserController(UserService userService)
+        {
+            _userService = userService;
+        }
         
         public void ProcessRequest(object sender, HttpSvrEventArgs e)
         {

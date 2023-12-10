@@ -1,9 +1,17 @@
 ﻿using API.HttpServer;
+using BusinessLogic.Services;
 
 namespace API.Controller
 {
     public class TradingController
     {
+        private TradingService _tradingService;
+        
+        public TradingController(TradingService tradingService)
+        {
+            _tradingService = tradingService;
+        }
+        
         public void ProcessRequest(object sender, HttpSvrEventArgs e)
         {
             if (e.Path.Equals("/tradings") && e.Method.Equals("GET"))

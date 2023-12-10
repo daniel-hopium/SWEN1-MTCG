@@ -1,9 +1,17 @@
 ﻿using API.HttpServer;
+using BusinessLogic.Services;
 
 namespace API.Controller
 {
     public class PackageController
     {
+        private PackageService _packageService;
+        
+        public PackageController(PackageService packageService)
+        {
+            _packageService = packageService;
+        }
+        
         public void ProcessRequest(object sender, HttpSvrEventArgs e)
         {
 

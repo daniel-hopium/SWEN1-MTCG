@@ -1,9 +1,17 @@
 ﻿using API.HttpServer;
+using BusinessLogic.Services;
 
 namespace API.Controller
 {
     public class CardsController
     {
+        private CardsService _cardsService;
+        
+        public CardsController(CardsService cardsService)
+        {
+            _cardsService = cardsService;
+        }
+        
         public void ProcessRequest(object sender, HttpSvrEventArgs e)
         {
             if (e.Path.Equals("/cards") && e.Method.Equals("GET"))
