@@ -12,7 +12,6 @@ namespace BusinessLogic.Services
         public void CreateUser(User user)
         {
             user.Password = PasswordHasher.HashPassword(user.Password);
-
             _userRepository.CreateUser(UserMapper.MapToDao(user));
         }
 
@@ -35,7 +34,6 @@ namespace BusinessLogic.Services
                 return false;
 
             return PasswordHasher.VerifyPassword(password, dbUser.Password);
-            // extend later (token)
         }
 
         public bool UserExists(string username)

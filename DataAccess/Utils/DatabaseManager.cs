@@ -1,7 +1,7 @@
 ﻿using System.Data;
 using Npgsql;
 
-namespace DataAccess.Config
+namespace DataAccess.Utils
 {
     public class DatabaseManager
     {

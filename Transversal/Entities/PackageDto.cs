@@ -2,5 +2,8 @@
 
 public class PackageDto
 {
-    public CardsDto[] Cards { get; set; }
+    public Guid Id { get; set; }
+    public List<CardsDto> Cards { get; set; }
+    public string Name { get; set; }
+    public int Price { get; set; }
 }

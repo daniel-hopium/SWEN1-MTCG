@@ -1,5 +1,5 @@
-﻿using DataAccess.Config;
-using DataAccess.Daos;
+﻿using DataAccess.Daos;
+using DataAccess.Utils;
 using Npgsql;
     
 namespace DataAccess.Repository
@@ -26,15 +26,14 @@ namespace DataAccess.Repository
                         }
                     }
                     conn.Close();
-                    conn.Dispose();
                 }
 
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error fetching user by username: {ex.Message}");
+                Console.WriteLine($"Error fetching user by username {username}: {ex.Message}");
             }
-            return null!; 
+            return null; 
         }
 
 
@@ -55,7 +54,6 @@ namespace DataAccess.Repository
                     cmd.ExecuteNonQuery();
                     
                     conn.Close();
-                    conn.Dispose();
                     
                 }
                 catch (Exception ex)
@@ -71,11 +69,14 @@ namespace DataAccess.Repository
         {
             return new UserDao
             {
+                Id = Guid.Parse(reader["id"].ToString()),
                 Bio = reader["bio"].ToString(),
                 Username = reader["username"].ToString(),
                 Password = reader["password"].ToString(),
                 Image = reader["image"].ToString(),
-                // Add other properties as needed
+                Coins = Convert.ToInt32(reader["coins"]),
+                Wins = Convert.ToInt32(reader["wins"]),
+                Losses = Convert.ToInt32(reader["losses"])
             };
         }
 
@@ -99,7 +100,6 @@ namespace DataAccess.Repository
                 }
                 
                 conn.Close();
-                conn.Dispose();
             }
 
             return null;
@@ -119,10 +119,25 @@ namespace DataAccess.Repository
                 count = Convert.ToInt32(cmd.ExecuteScalar());
                 
                 conn.Close();
-                conn.Dispose();
             }
             
             return count > 0;
+        }
+
+        public void UpdateUserMoney(UserDao user, int packagePrice)
+        {
+            using (NpgsqlConnection conn = new NpgsqlConnection(DatabaseManager.ConnectionString))
+            using (NpgsqlCommand cmd = new NpgsqlCommand("UPDATE users SET coins = @coins WHERE username = @username", conn))
+            {
+                conn.Open();
+                
+                cmd.Parameters.AddWithValue("@username", user.Username);
+                cmd.Parameters.AddWithValue("@coins", user.Coins - packagePrice);
+                Console.WriteLine(packagePrice);
+                cmd.ExecuteNonQuery();
+                
+                conn.Close();
+            }
         }
     }
 

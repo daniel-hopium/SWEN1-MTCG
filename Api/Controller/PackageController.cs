@@ -31,23 +31,30 @@ namespace API.Controller
 
         private void BuyCardPackage(HttpSvrEventArgs e)
         {
-            throw new NotImplementedException();
+            if (!Authorization.AuthorizeUser(e.Authorization))
+            {
+                e.Reply(401, "Unauthorized");
+                return;
+            }
+            
+            var package = JsonConvert.DeserializeObject<PackageDto>(e.Payload);
+            var username = Authorization.GetUsernameFromAuthorization(e.Authorization);
+            _packageService.BuyCardPackage(package, username);
+            e.Reply(201, "Package bought");
         }
 
         private void CreatePackages(HttpSvrEventArgs e)
         {
-            if(Authorization.AuthorizeAdmin(e.Authorization))
-            {
-                var cards = JsonConvert.DeserializeObject<List<CardsDto>>(e.Payload);
-                _packageService.CreatePackage(cards);
-                e.Reply(200, "Package created");
-            }
-            else
+            if (!Authorization.AuthorizeAdmin(e.Authorization))
             {
                 e.Reply(401, "Unauthorized");
+                return;
             }
-            Console.WriteLine(e.PlainMessage);
-            e.Reply(200, "wda");
+            
+            var cards = JsonConvert.DeserializeObject<List<CardsDto>>(e.Payload);
+            _packageService.CreatePackage(cards);
+            e.Reply(201, "Package and cards successfully created");
+                
         }
     }   
 }
