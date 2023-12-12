@@ -1,9 +1,14 @@
-﻿namespace Api.Utils;
+﻿using BusinessLogic.Services;
+using Transversal.Entities;
+
+namespace Api.Utils;
 
 public static class Authorization
 {
     private static string Type { get;  set; } 
     private static string Token { get;  set; }
+    
+    private static UserService _userService = new UserService();
     
     public static bool AuthorizeAdmin(string authorization)
     {
@@ -19,5 +24,31 @@ public static class Authorization
         if (Token != "admin-mtcgToken") return false;
 
         return true;
+    }
+
+    public static bool AuthorizeUser(string authorization)
+    {
+        if(string.IsNullOrWhiteSpace(authorization)) return false;
+        
+        string[] parts = authorization.Split(' ');
+        if (parts.Length != 2) return false;
+        
+        Type = parts[0];
+        Token = parts[1];
+        var tokenParts = Token.Split('-');
+        if (tokenParts.Length != 2) return false;
+        if (Type != "Bearer") return false;
+        if (tokenParts[1] != "mtcgToken") return false;
+        
+        return _userService.UserExists(tokenParts[0]);
+    }
+
+    public static string GetUsernameFromAuthorization(string authorization)
+    {
+        string[] parts = authorization.Split(' ');
+        Token = parts[1];
+        
+        var tokenParts = Token.Split('-');
+        return tokenParts[0];
     }
 }
