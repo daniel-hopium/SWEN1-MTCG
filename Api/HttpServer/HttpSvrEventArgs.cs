@@ -41,7 +41,7 @@ namespace API.HttpServer
                     Path = inc[1];
                     
                 }
-                if (i == 2)
+                if (lines[i].ToUpper().StartsWith("AUTHORIZATION:"))
                 {
                     string[] inc = lines[i].Split(' ');
                     if(inc[0].ToUpper() == "AUTHORIZATION:")
