@@ -19,17 +19,17 @@ CREATE TABLE users (
 );
 
 CREATE TABLE cards (
-    id     uuid            DEFAULT uuid_generate_v4() PRIMARY KEY,
+    id     uuid                 PRIMARY KEY,
     name        VARCHAR(255)    NOT NULL,
     damage      INT             NOT NULL,
-    element_type VARCHAR(255)   NOT NULL,
-    card_type   VARCHAR(255)    NOT NULL,
+    element_type VARCHAR(255)   ,
+    card_type   VARCHAR(255)    ,
     user_id     uuid            REFERENCES users(id) ON DELETE CASCADE
 );
 
 CREATE TABLE packages (
-    id          uuid            DEFAULT uuid_generate_v4() PRIMARY KEY,
-    name        VARCHAR(255)    NOT NULL,
+    id          uuid            PRIMARY KEY,
+    name        VARCHAR(255)    ,
     price       INT             NOT NULL DEFAULT 5
 );
 
@@ -40,26 +40,12 @@ CREATE TABLE package_cards
     card_id    uuid NOT NULL REFERENCES cards (id) ON DELETE CASCADE
 );
 
-
 CREATE TABLE user_cards
 (
-    id      uuid        DEFAULT uuid_generate_v4() PRIMARY KEY,
-    user_id uuid        NOT NULL REFERENCES users (id) ON DELETE CASCADE,
-    card_id uuid         NOT NULL REFERENCES cards (id) ON DELETE CASCADE
-);
-
-CREATE TABLE decks
-(
-    id      uuid DEFAULT uuid_generate_v4() PRIMARY KEY,
-    name    VARCHAR(255) NOT NULL UNIQUE,
-    user_id uuid      NOT NULL REFERENCES users (id) ON DELETE CASCADE
-);
-
-CREATE TABLE deck_cards
-(
-    id      uuid            DEFAULT uuid_generate_v4() PRIMARY KEY,
-    deck_id uuid            NOT NULL REFERENCES decks (id) ON DELETE CASCADE,
-    card_id uuid            NOT NULL REFERENCES cards (id) ON DELETE CASCADE
+    id              uuid        DEFAULT uuid_generate_v4() PRIMARY KEY,
+    user_id         uuid        NOT NULL REFERENCES users (id) ON DELETE CASCADE,
+    card_id         uuid        NOT NULL REFERENCES cards (id) ON DELETE CASCADE,
+    is_in_deck      bool        NOT NULL DEFAULT FALSE
 );
 
 CREATE TABLE battles
@@ -67,11 +53,8 @@ CREATE TABLE battles
     id      uuid            DEFAULT uuid_generate_v4() PRIMARY KEY,
     timestamp TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
     user_id uuid         NOT NULL REFERENCES users (id),
-    deck_id uuid            NOT NULL REFERENCES decks (id),
     opponent_id uuid     NOT NULL REFERENCES users (id),
-    opponent_deck_id uuid   NOT NULL REFERENCES decks (id),
-    winner_id uuid       NOT NULL REFERENCES users (id),
-    winner_deck_id uuid     NOT NULL REFERENCES decks (id)
+    winner_id uuid       NOT NULL REFERENCES users (id)
 );
 
 CREATE TABLE scoreboard 
