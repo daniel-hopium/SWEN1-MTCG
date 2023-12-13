@@ -1,5 +1,8 @@
 ﻿using API.HttpServer;
+using Api.Utils;
 using BusinessLogic.Services;
+using Newtonsoft.Json;
+using Transversal.Entities;
 
 namespace API.Controller
 {
@@ -33,24 +36,49 @@ namespace API.Controller
         
         }
 
-        private void CreateTrade(HttpSvrEventArgs httpSvrEventArgs)
+        private void CreateTrade(HttpSvrEventArgs e)
         {
             throw new NotImplementedException();
         }
 
-        private void DeleteTrading(HttpSvrEventArgs httpSvrEventArgs)
+        private void DeleteTrading(HttpSvrEventArgs e)
         {
             throw new NotImplementedException();
         }
 
-        private void CreateTrading(HttpSvrEventArgs httpSvrEventArgs)
+        private void CreateTrading(HttpSvrEventArgs e)
         {
-            throw new NotImplementedException();
+            if (!Authorization.AuthorizeUser(e.Authorization))
+            {
+                e.Reply(401, "Unauthorized");
+                return;
+            }
+            var username = Authorization.GetUsernameFromAuthorization(e.Authorization);
+            var trade = JsonConvert.DeserializeObject<TradeDto>(e.Payload);
+            Console.WriteLine(trade);
+            
+            _tradingService.CreateTrading(username, trade);
+            
+            
+            e.Reply(200, "Successfully created trade");
         }
 
-        private void GetTradings(HttpSvrEventArgs httpSvrEventArgs)
+        private void GetTradings(HttpSvrEventArgs e)
         {
-            throw new NotImplementedException();
+            if (!Authorization.AuthorizeUser(e.Authorization))
+            {
+                e.Reply(401, "Unauthorized");
+                return;
+            }
+            var username = Authorization.GetUsernameFromAuthorization(e.Authorization);
+            
+            var tradings = _tradingService.GetTradings(username);
+            if (tradings.Count == 0)
+            {
+                e.Reply(204, "");
+                return;
+            }
+            e.Reply(200, JsonConvert.SerializeObject(tradings));
         }
     }    
 }
