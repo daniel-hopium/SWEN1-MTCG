@@ -19,34 +19,34 @@ namespace API.Controller
         {
             if (e.Path.Equals("/tradings") && e.Method.Equals("GET"))
             {
-                GetTradings(e);
+                GetTrades(e);
             }
             else if (e.Path.Equals("/tradings") && e.Method.Equals("POST"))
             {
-                CreateTrading(e);
+                CreateTrade(e);
             }
             else if (e.Path.StartsWith("/tradings/") && e.Method.Equals("DELETE"))
             {
-                DeleteTrading(e);
+                DeleteTrade(e);
             }
             else if (e.Path.StartsWith("/tradings/") && e.Method.Equals("POST"))
             {
-                CreateTrade(e);
+                CarryOutTrade(e);
             }
         
         }
 
+        private void CarryOutTrade(HttpSvrEventArgs e)
+        {
+            throw new NotImplementedException();
+        }
+
+        private void DeleteTrade(HttpSvrEventArgs e)
+        {
+            throw new NotImplementedException();
+        }
+
         private void CreateTrade(HttpSvrEventArgs e)
-        {
-            throw new NotImplementedException();
-        }
-
-        private void DeleteTrading(HttpSvrEventArgs e)
-        {
-            throw new NotImplementedException();
-        }
-
-        private void CreateTrading(HttpSvrEventArgs e)
         {
             if (!Authorization.AuthorizeUser(e.Authorization))
             {
@@ -57,13 +57,13 @@ namespace API.Controller
             var trade = JsonConvert.DeserializeObject<TradeDto>(e.Payload);
             Console.WriteLine(trade.ToString());
             
-           // _tradingService.CreateTrading(username, trade);
+            _tradingService.CreateTrade(username, trade);
             
             
             e.Reply(200, "Successfully created trade");
         }
 
-        private void GetTradings(HttpSvrEventArgs e)
+        private void GetTrades(HttpSvrEventArgs e)
         {
             if (!Authorization.AuthorizeUser(e.Authorization))
             {
@@ -72,7 +72,7 @@ namespace API.Controller
             }
             var username = Authorization.GetUsernameFromAuthorization(e.Authorization);
             
-            var tradings = _tradingService.GetTradings(username);
+            var tradings = _tradingService.GetTrades(username);
             if (tradings.Count == 0)
             {
                 e.Reply(204, "");

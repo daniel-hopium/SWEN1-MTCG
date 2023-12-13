@@ -9,12 +9,12 @@ public class TradingService
     private readonly  TradeMapper _tradeMapper = new TradeMapper();
     private readonly TradeRepository _tradeRepository = new TradeRepository();
     private readonly UserRepository _userRepository = new UserRepository();
-    public List<TradeDto> GetTradings(string username)
+    public List<TradeDto> GetTrades(string username)
     {
         try
         {
             var user = _userRepository.GetUserByUsername(username);
-            return TradeMapper.MapToDtoList(_tradeRepository.GetTradings());
+            return TradeMapper.MapToDtoList(_tradeRepository.GetTrades());
         }
         catch (Exception e)
         {
@@ -24,7 +24,7 @@ public class TradingService
         return new List<TradeDto>();
     }
 
-    public void CreateTrading(string username, TradeDto trade)
+    public void CreateTrade(string username, TradeDto trade)
     {
         throw new NotImplementedException();
     }

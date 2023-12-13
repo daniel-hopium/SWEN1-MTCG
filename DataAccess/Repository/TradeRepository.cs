@@ -6,7 +6,7 @@ namespace DataAccess.Repository;
 
 public class TradeRepository
 {
-    public List<TradeDao> GetTradings()
+    public List<TradeDao> GetTrades()
     {
         List<TradeDao> tradingsList = new List<TradeDao>();
 
