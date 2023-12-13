@@ -64,21 +64,13 @@ CREATE TABLE scoreboard
     elo     INTEGER      NOT NULL
 );
 
+
 CREATE TABLE trades
 (
-    id      uuid DEFAULT uuid_generate_v4() PRIMARY KEY,
-    timestamp TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    user_id uuid      NOT NULL REFERENCES users (id),
-    card_id uuid         NOT NULL REFERENCES cards (id),
-    price   INTEGER      NOT NULL
-);
-
-CREATE TABLE trade_offers
-(
-    id      uuid DEFAULT uuid_generate_v4() PRIMARY KEY,
-    trade_id uuid        NOT NULL REFERENCES trades (id),
-    user_id uuid      NOT NULL REFERENCES users (id),
-    card_id uuid         NOT NULL REFERENCES cards (id)
+    id          uuid            PRIMARY KEY,
+    timestamp   TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    user_card_id uuid           NOT NULL REFERENCES user_cards (id) ON DELETE CASCADE,
+    price       INTEGER         NOT NULL DEFAULT 1
 );
 
 
