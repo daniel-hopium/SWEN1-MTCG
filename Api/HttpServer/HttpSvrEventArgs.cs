@@ -1,5 +1,6 @@
 ﻿using System.Net.Sockets;
 using System.Text;
+using System.Threading.Channels;
 
 namespace API.HttpServer
 {
@@ -12,7 +13,9 @@ namespace API.HttpServer
 
         /// <summary>TCP client.</summary>
         protected TcpClient _Client;
-
+        
+        // <summary>Tracking Duration of Request</summary>
+        private readonly DateTime startTime;
 
 
         //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -24,6 +27,8 @@ namespace API.HttpServer
         /// <param name="plainMessage">HTTP plain message.</param>
         public HttpSvrEventArgs(TcpClient client, string plainMessage) 
         {
+            startTime = DateTime.UtcNow;
+            
             _Client = client;
             PlainMessage = plainMessage;
             Payload = string.Empty;
@@ -63,6 +68,9 @@ namespace API.HttpServer
             }
 
             Headers = headers.ToArray();
+
+            Console.WriteLine($"Received: {Method} {Path} - Timestamp: {DateTime.Now}");
+
         }
 
 
@@ -122,6 +130,9 @@ namespace API.HttpServer
         /// <param name="payload">Payload.</param>
         public virtual void Reply(int status, string? payload = null)
         {
+            DateTime endTime = DateTime.UtcNow;
+            TimeSpan duration = endTime - startTime;
+            
             string data;
 
             data = GetHttpResponseStatus(status);
@@ -138,6 +149,8 @@ namespace API.HttpServer
             _Client.GetStream().Write(buf, 0, buf.Length);
             _Client.Close();
             _Client.Dispose();
+
+            Console.WriteLine($"Replying: {status} - Duration: {duration.TotalMilliseconds} ms");
         }
         
         public static string GetHttpResponseStatus(int statusCode)
@@ -170,7 +183,5 @@ namespace API.HttpServer
             }
             return  pathSegments[2]; 
         }
-
     }
-    
 }
