@@ -55,9 +55,9 @@ namespace API.Controller
             }
             var username = Authorization.GetUsernameFromAuthorization(e.Authorization);
             var trade = JsonConvert.DeserializeObject<TradeDto>(e.Payload);
-            Console.WriteLine(trade);
+            Console.WriteLine(trade.ToString());
             
-            _tradingService.CreateTrading(username, trade);
+           // _tradingService.CreateTrading(username, trade);
             
             
             e.Reply(200, "Successfully created trade");

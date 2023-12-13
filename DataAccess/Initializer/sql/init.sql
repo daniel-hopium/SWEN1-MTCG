@@ -70,6 +70,7 @@ CREATE TABLE trades
     id          uuid            PRIMARY KEY,
     timestamp   TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,
     user_card_id uuid           NOT NULL REFERENCES user_cards (id) ON DELETE CASCADE,
+    minimum_damage INTEGER      NOT NULL,
     price       INTEGER         NOT NULL DEFAULT 1
 );
 

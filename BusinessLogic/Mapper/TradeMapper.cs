@@ -18,7 +18,7 @@ public class TradeMapper
             Id = tradeDao.Id,
             CardToTrade = tradeDao.CardToTrade,
             Type = tradeDao.Type,
-            Damage = tradeDao.Damage
+            MinimumDamage = tradeDao.MinimumDamage
         };
     }
 
@@ -34,7 +34,7 @@ public class TradeMapper
             Id = tradeDto.Id,
             CardToTrade = tradeDto.CardToTrade,
             Type = tradeDto.Type,
-            Damage = tradeDto.Damage
+            MinimumDamage = tradeDto.MinimumDamage
         };
     }
 

@@ -27,7 +27,7 @@ public class TradeRepository
                             Id = Guid.Parse(reader["id"].ToString()),
                             CardToTrade = Guid.Parse(reader["card_to_trade"].ToString()),
                             Type = reader["type"].ToString(),
-                            Damage = int.Parse(reader["damage"].ToString())
+                            MinimumDamage = int.Parse(reader["damage"].ToString())
                         });
                     }
                 }
