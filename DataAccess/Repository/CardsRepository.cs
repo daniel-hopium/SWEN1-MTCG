@@ -6,14 +6,14 @@ namespace DataAccess.Repository
 {
     public class CardsRepository
     {
-        public void CreateCards(List<CardsDao> cards)
+        public void CreateCards(List<CardDao> cards)
         {
             if (cards == null || cards.Count == 0)
             {
                 throw new ArgumentException("The list of cards cannot be null or empty.", nameof(cards));
             }
 
-            string insertQuery = "INSERT INTO cards (id, name, damage) VALUES (@id, @name, @damage)";
+            string insertQuery = "INSERT INTO cards (id, name, damage, element_type, card_type) VALUES (@id, @name, @damage, @elementType, @cardType)";
 
             using (NpgsqlConnection conn = new NpgsqlConnection(DatabaseManager.ConnectionString))
             using (NpgsqlCommand cmd = new NpgsqlCommand(insertQuery, conn))
@@ -29,6 +29,8 @@ namespace DataAccess.Repository
                         cmd.Parameters.AddWithValue("@id", card.Id);
                         cmd.Parameters.AddWithValue("@name", card.Name);
                         cmd.Parameters.AddWithValue("@damage", card.Damage);
+                        cmd.Parameters.AddWithValue("@elementType", card.ElementType != null ? card.ElementType : DBNull.Value);
+                        cmd.Parameters.AddWithValue("@cardType", card.ElementType != null ? card.CardType : DBNull.Value);
 
                         cmd.ExecuteNonQuery();
 
@@ -45,9 +47,9 @@ namespace DataAccess.Repository
             }
         }
 
-        public List<CardsDao> GetAllCards(Guid userId)
+        public List<CardDao> GetAllCards(Guid userId)
         {
-            List<CardsDao> cardsList = new List<CardsDao>();
+            List<CardDao> cardsList = new List<CardDao>();
 
             try
             {
@@ -63,7 +65,7 @@ namespace DataAccess.Repository
                         while (reader.Read())
                         {
                             Guid cardId = Guid.Parse(reader["card_id"].ToString());
-                            CardsDao card = GetCardById(cardId);
+                            CardDao card = GetCardById(cardId);
                             if (card != null)
                             {
                                 cardsList.Add(card);
@@ -82,9 +84,9 @@ namespace DataAccess.Repository
             return cardsList;
         }
         
-        public CardsDao? GetCardById(Guid cardId)
+        public CardDao? GetCardById(Guid cardId)
         {
-            CardsDao card = null;
+            CardDao card = null;
             try
             {
                 using (NpgsqlConnection conn = new NpgsqlConnection(DatabaseManager.ConnectionString))
@@ -113,19 +115,21 @@ namespace DataAccess.Repository
             return card;
         }
         
-        private CardsDao MapCardFromDataReader(NpgsqlDataReader reader)
+        private CardDao MapCardFromDataReader(NpgsqlDataReader reader)
         {
-            return new CardsDao()
+            return new CardDao()
             {
                 Id = Guid.Parse(reader["id"].ToString()),
                 Name = reader["name"].ToString(),
-                Damage = Int16.Parse(reader["damage"].ToString())
+                Damage = Int16.Parse(reader["damage"].ToString()),
+                ElementType = reader["element_type"].ToString(),
+                CardType = reader["card_type"].ToString()
             };
         }
 
-        public List<CardsDao> GetDeck(Guid userId)
+        public List<CardDao> GetDeck(Guid userId)
         {
-            List<CardsDao> cardsList = new List<CardsDao>();
+            List<CardDao> cardsList = new List<CardDao>();
 
             try
             {
@@ -141,7 +145,7 @@ namespace DataAccess.Repository
                         while (reader.Read())
                         {
                             Guid cardId = Guid.Parse(reader["card_id"].ToString());
-                            CardsDao card = GetCardById(cardId);
+                            CardDao card = GetCardById(cardId);
                             if (card != null)
                             {
                                 cardsList.Add(card);
@@ -159,7 +163,7 @@ namespace DataAccess.Repository
             return cardsList;
         }
 
-        public bool ValidateDeckForConfiguration(Guid userId, List<CardsDao> cards, int deckSize)
+        public bool ValidateDeckForConfiguration(Guid userId, List<CardDao> cards, int deckSize)
         {
             try
             {
@@ -172,7 +176,7 @@ namespace DataAccess.Repository
                         using (NpgsqlCommand cmd = new NpgsqlCommand("SELECT COUNT(*) FROM user_cards WHERE user_id = @userId AND card_id = @cardId", conn))
                         {
                             cmd.Parameters.AddWithValue("@userId", userId);
-                            cmd.Parameters.AddWithValue("@cardId", card.Id); // Assuming there is a property like CardId in CardsDao
+                            cmd.Parameters.AddWithValue("@cardId", card.Id);
                             int count = Convert.ToInt32(cmd.ExecuteScalar());
 
                             if (count == 0)
@@ -197,7 +201,7 @@ namespace DataAccess.Repository
             return true; // The deck configuration is valid
         }
 
-        public void ConfigureDeck(Guid userId, List<CardsDao> cards)
+        public void ConfigureDeck(Guid userId, List<CardDao> cards)
         {
             try
             {
@@ -241,6 +245,100 @@ namespace DataAccess.Repository
             catch (Exception ex)
             {
                 Console.WriteLine($"Error resetting deck for user {userId}: {ex.Message}");
+            }
+        }
+
+        public UserCardDao? GetUserCardByUserAndCardId(Guid userId, Guid cardId)
+        {
+            UserCardDao userCard = null;
+            try
+            {
+                using (NpgsqlConnection conn = new NpgsqlConnection(DatabaseManager.ConnectionString))
+                using (NpgsqlCommand cmd = new NpgsqlCommand("SELECT * FROM user_cards WHERE card_id = @cardId AND user_id = @userId AND is_in_deck = FALSE", conn))
+                {
+                    conn.Open();
+
+                    cmd.Parameters.AddWithValue("@cardId", cardId);
+                    cmd.Parameters.AddWithValue("@userId", userId);
+
+                    using (NpgsqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            return new UserCardDao()
+                            {
+                                Id = Guid.Parse(reader["id"].ToString()),
+                                UserId = userId,
+                                CardId = cardId
+                            };
+                        }
+                    }
+
+                    conn.Close();
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error fetching card by ID {cardId}: {ex.Message}");
+            }
+
+            return null;
+        }
+        
+        public UserCardDao? GetUserCardById(Guid userCardId)
+        {
+            UserCardDao userCard = null;
+            try
+            {
+                using (NpgsqlConnection conn = new NpgsqlConnection(DatabaseManager.ConnectionString))
+                using (NpgsqlCommand cmd = new NpgsqlCommand("SELECT * FROM user_cards WHERE id = @userCardId AND is_in_deck = FALSE", conn))
+                {
+                    conn.Open();
+
+                    cmd.Parameters.AddWithValue("@userCardId", userCardId);
+
+                    using (NpgsqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            return new UserCardDao()
+                            {
+                                Id = Guid.Parse(reader["id"].ToString()),
+                                UserId = Guid.Parse(reader["user_id"].ToString()),
+                                CardId = Guid.Parse(reader["card_id"].ToString())
+                            };
+                        }
+                    }
+
+                    conn.Close();
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error fetching card by ID {userCardId}: {ex.Message}");
+            }
+
+            return null;
+        }
+
+        public void DeleteUserCard(Guid userCardId)
+        {
+            try
+            {
+                using (NpgsqlConnection conn = new NpgsqlConnection(DatabaseManager.ConnectionString))
+                using (NpgsqlCommand cmd = new NpgsqlCommand("DELETE FROM user_cards WHERE id = @userCardId", conn))
+                {
+                    conn.Open();
+
+                    cmd.Parameters.AddWithValue("@userCardId", userCardId);
+                    cmd.ExecuteNonQuery();
+
+                    conn.Close();
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error deleting user card {userCardId}: {ex.Message}");
             }
         }
     }

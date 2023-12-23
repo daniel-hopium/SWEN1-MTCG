@@ -1,49 +1,53 @@
-﻿using System.Collections.Generic;
-using DataAccess.Daos;
+﻿using DataAccess.Daos;
 using Transversal.Entities;
 
 namespace BusinessLogic.Mapper
 {
     public class CardsMapper
     {
-        public static CardsDto MapToDto(CardsDao cardsDao)
+        public static CardDto MapToDto(CardDao cardDao)
         {
-            if (cardsDao == null)
+            if (cardDao == null)
             {
                 return null;
             }
 
-            return new CardsDto
+            return new CardDto
             {
-                Id = cardsDao.Id,
-                Name = cardsDao.Name,
-                Damage = cardsDao.Damage
+                Id = cardDao.Id,
+                Name = cardDao.Name,
+                Damage = cardDao.Damage,
+                ElementType = cardDao.ElementType,
+                CardType = cardDao.CardType
             };
         }
 
-        public static CardsDao MapToDao(CardsDto cardsDto)
+        public static CardDao MapToDao(CardDto cardDto)
         {
-            if (cardsDto == null)
+            if (cardDto == null)
             {
                 return null;
             }
 
-            return new CardsDao
+            return new CardDao
             {
-                Id = cardsDto.Id,
-                Name = cardsDto.Name,
-                Damage = cardsDto.Damage
+                Id = cardDto.Id,
+                Name = cardDto.Name,
+                Damage = cardDto.Damage,
+                ElementType = cardDto.ElementType,
+                CardType = cardDto.CardType
+                    
             };
         }
 
-        public static List<CardsDto> MapToDtoList(List<CardsDao> cardsDaoList)
+        public static List<CardDto> MapToDtoList(List<CardDao> cardsDaoList)
         {
             if (cardsDaoList == null)
             {
                 return null;
             }
 
-            List<CardsDto> cardsDtoList = new List<CardsDto>();
+            List<CardDto> cardsDtoList = new List<CardDto>();
             foreach (var cardsDao in cardsDaoList)
             {
                 cardsDtoList.Add(MapToDto(cardsDao));
@@ -52,14 +56,14 @@ namespace BusinessLogic.Mapper
             return cardsDtoList;
         }
 
-        public static List<CardsDao> MapToDaoList(List<CardsDto> cardsDao)
+        public static List<CardDao> MapToDaoList(List<CardDto> cardsDao)
         {
             if (cardsDao == null)
             {
                 return null;
             }
 
-            List<CardsDao> cardsDaoList = new List<CardsDao>();
+            List<CardDao> cardsDaoList = new List<CardDao>();
             foreach (var cardsDto in cardsDao)
             {
                 cardsDaoList.Add(MapToDao(cardsDto));

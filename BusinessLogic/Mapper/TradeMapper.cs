@@ -16,7 +16,7 @@ public class TradeMapper
         return new TradeDto
         {
             Id = tradeDao.Id,
-            CardToTrade = tradeDao.CardToTrade,
+            CardId = tradeDao.UserCardToTradeId,
             Type = tradeDao.Type,
             MinimumDamage = tradeDao.MinimumDamage
         };
@@ -32,7 +32,7 @@ public class TradeMapper
         return new TradeDao
         {
             Id = tradeDto.Id,
-            CardToTrade = tradeDto.CardToTrade,
+            UserCardToTradeId = tradeDto.CardId,
             Type = tradeDto.Type,
             MinimumDamage = tradeDto.MinimumDamage
         };

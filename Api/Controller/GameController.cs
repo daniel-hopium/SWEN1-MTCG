@@ -1,4 +1,5 @@
 ﻿using API.HttpServer;
+using Api.Utils;
 using BusinessLogic.Services;
 
 namespace API.Controller
@@ -29,12 +30,19 @@ namespace API.Controller
         
         }
 
-        private void AttemptStartBattle(HttpSvrEventArgs httpSvrEventArgs)
+        private void AttemptStartBattle(HttpSvrEventArgs e)
         {
-            throw new NotImplementedException();
+            if (!Authorization.AuthorizeUser(e.Authorization))
+            {
+                e.Reply(401, "Unauthorized");
+                return;
+            }
+            var username = Authorization.GetUsernameFromAuthorization(e.Authorization);
+            var battleStats = _gameService.AttemptStartBattle(username);
+            e.Reply(200, battleStats);
         }
 
-        private void GetScoreboard(HttpSvrEventArgs httpSvrEventArgs)
+        private void GetScoreboard(HttpSvrEventArgs e)
         {
             throw new NotImplementedException();
         }

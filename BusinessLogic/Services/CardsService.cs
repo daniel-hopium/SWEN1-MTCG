@@ -1,7 +1,6 @@
 ﻿using BusinessLogic.Mapper;
 using BusinessLogic.Utils;
 using DataAccess.Repository;
-using NUnit.Framework;
 using Transversal.Entities;
 
 namespace BusinessLogic.Services;
@@ -13,7 +12,7 @@ public class CardsService
     CardsRepository _cardsRepository = new CardsRepository();
     UserRepository _userRepository = new UserRepository();
     
-    public List<CardsDto> GetAllCards(string username)
+    public List<CardDto> GetAllCards(string username)
     {
         try
         {
@@ -25,10 +24,10 @@ public class CardsService
             Console.WriteLine(e);
             
         }
-        return new List<CardsDto>();
+        return new List<CardDto>();
     }
 
-    public List<CardsDto> GetDeck(string username)
+    public List<CardDto> GetDeck(string username)
     {
         try
         {
@@ -40,10 +39,10 @@ public class CardsService
             Console.WriteLine(e.Message);
             
         }
-        return new List<CardsDto>();
+        return new List<CardDto>();
     }
 
-    public void ConfigureDeck(string username, List<CardsDto> cards)
+    public void ConfigureDeck(string username, List<CardDto> cards)
     {
         try
         {

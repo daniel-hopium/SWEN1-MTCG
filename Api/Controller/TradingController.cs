@@ -38,12 +38,34 @@ namespace API.Controller
 
         private void CarryOutTrade(HttpSvrEventArgs e)
         {
-            throw new NotImplementedException();
+            if (!Authorization.AuthorizeUser(e.Authorization))
+            {
+                e.Reply(401, "Unauthorized");
+                return;
+            }
+            var username = Authorization.GetUsernameFromAuthorization(e.Authorization);
+            var tradeId = JsonConvert.DeserializeObject<Guid>(e.Payload);
+            Console.WriteLine(tradeId.ToString());
+            
+            _tradingService.CarryOutTrade(username, tradeId);
+            
+            e.Reply(200, "Trade successfully carried out");
         }
 
         private void DeleteTrade(HttpSvrEventArgs e)
         {
-            throw new NotImplementedException();
+            if (!Authorization.AuthorizeUser(e.Authorization))
+            {
+                e.Reply(401, "Unauthorized");
+                return;
+            }
+            var username = Authorization.GetUsernameFromAuthorization(e.Authorization);
+            var tradeId = JsonConvert.DeserializeObject<Guid>(e.Payload);
+            Console.WriteLine(tradeId.ToString());
+            
+            _tradingService.DeleteTrade(username, tradeId);
+            
+            e.Reply(200, "Successfully deleted trade");
         }
 
         private void CreateTrade(HttpSvrEventArgs e)
@@ -58,7 +80,6 @@ namespace API.Controller
             Console.WriteLine(trade.ToString());
             
             _tradingService.CreateTrade(username, trade);
-            
             
             e.Reply(200, "Successfully created trade");
         }

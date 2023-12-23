@@ -36,11 +36,19 @@ namespace API.Controller
                 e.Reply(401, "Unauthorized");
                 return;
             }
-            
+
             var package = JsonConvert.DeserializeObject<PackageDto>(e.Payload);
             var username = Authorization.GetUsernameFromAuthorization(e.Authorization);
-            _packageService.BuyCardPackage(package, username);
-            e.Reply(201, "Package bought");
+            try
+            {
+                _packageService.BuyCardPackage(package, username);
+                e.Reply(201, "Package bought");
+            }
+            catch (Exception exception)
+            {
+                e.Reply(400, exception.Message);
+            }
+            
         }
 
         private void CreatePackages(HttpSvrEventArgs e)
@@ -51,10 +59,10 @@ namespace API.Controller
                 return;
             }
             
-            var cards = JsonConvert.DeserializeObject<List<CardsDto>>(e.Payload);
+            var cards = JsonConvert.DeserializeObject<List<CardDto>>(e.Payload);
             _packageService.CreatePackage(cards);
             e.Reply(201, "Package and cards successfully created");
-                
+            
         }
     }   
 }

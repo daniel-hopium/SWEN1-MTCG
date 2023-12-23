@@ -41,7 +41,7 @@ namespace API.Controller
             var username = Authorization.GetUsernameFromAuthorization(e.Authorization);
             var cardIds = JsonConvert.DeserializeObject<List<Guid>>(e.Payload);
             Console.WriteLine(cardIds);
-            var cards = cardIds.Select(cardId => new CardsDto { Id = cardId }).ToList();
+            var cards = cardIds.Select(cardId => new CardDto { Id = cardId }).ToList();
             
             _cardsService.ConfigureDeck(username, cards);
             

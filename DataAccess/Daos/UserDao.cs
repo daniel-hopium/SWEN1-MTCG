@@ -13,7 +13,8 @@ namespace DataAccess.Daos
         public int Coins { get; set; }
         public int Wins { get; set; }
         public int Losses { get; set; }
-    
+        
+        public List<CardDao>? Deck { get; set; }
     }    
 }
 

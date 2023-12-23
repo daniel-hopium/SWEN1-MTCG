@@ -6,7 +6,7 @@ namespace DataAccess.Repository;
 
 public class PackageRepository
 {
-    public void CreatePackage(List<CardsDao> cards, Guid packageId)
+    public void CreatePackage(List<CardDao> cards, Guid packageId)
     {
         if (cards == null || cards.Count == 0)
         {
@@ -37,7 +37,7 @@ public class PackageRepository
         
     }
 
-    public void AddCardsToPackage(List<CardsDao> cards, Guid packageId)
+    public void AddCardsToPackage(List<CardDao> cards, Guid packageId)
     {
         string insertQuery = "INSERT INTO package_cards (package_id, card_id) VALUES (@packageId, @cardId)";
 
@@ -69,39 +69,39 @@ public class PackageRepository
     }
 
     public PackageDao FindPackage(Guid packageId)
-{
-    try
     {
-        using (NpgsqlConnection conn = new NpgsqlConnection(DatabaseManager.ConnectionString))
+        try
         {
-            conn.Open();
-
-            using (NpgsqlTransaction transaction = conn.BeginTransaction())
+            using (NpgsqlConnection conn = new NpgsqlConnection(DatabaseManager.ConnectionString))
             {
-                try
-                {
-                    PackageDao package = FetchPackage(packageId, conn, transaction);
-                    
-                    // Load associated cards
-                    package.Cards = LoadCardsForPackage(packageId, conn, transaction);
+                conn.Open();
 
-                    transaction.Commit();
-                    return package;
-                }
-                catch (Exception ex)
+                using (NpgsqlTransaction transaction = conn.BeginTransaction())
                 {
-                    Console.WriteLine($"Error in transaction: {ex.Message}");
-                    transaction.Rollback();
+                    try
+                    {
+                        PackageDao package = FetchPackage(packageId, conn, transaction);
+                        
+                        // Load associated cards
+                        package.Cards = LoadCardsForPackage(packageId, conn, transaction);
+
+                        transaction.Commit();
+                        return package;
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Error in transaction: {ex.Message}");
+                        transaction.Rollback();
+                    }
                 }
             }
         }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error fetching package by id: {ex.Message}");
+        }
+        return null!;
     }
-    catch (Exception ex)
-    {
-        Console.WriteLine($"Error fetching package by id: {ex.Message}");
-    }
-    return null!;
-}
 
 private PackageDao FetchPackage(Guid packageId, NpgsqlConnection connection, NpgsqlTransaction transaction)
 {
@@ -121,9 +121,9 @@ private PackageDao FetchPackage(Guid packageId, NpgsqlConnection connection, Npg
     return null;
 }
 
-private List<CardsDao> LoadCardsForPackage(Guid packageId, NpgsqlConnection connection, NpgsqlTransaction transaction)
+private List<CardDao> LoadCardsForPackage(Guid packageId, NpgsqlConnection connection, NpgsqlTransaction transaction)
 {
-    List<CardsDao> cards = new List<CardsDao>();
+    List<CardDao> cards = new List<CardDao>();
 
     using (NpgsqlCommand cmd = new NpgsqlCommand("SELECT card_id FROM package_cards WHERE package_id = @packageId", connection, transaction))
     {
@@ -137,7 +137,7 @@ private List<CardsDao> LoadCardsForPackage(Guid packageId, NpgsqlConnection conn
                 
                 if (cardId != null)
                 {
-                    cards.Add(new CardsDao()
+                    cards.Add(new CardDao()
                     {
                         Id = cardId
                     });
@@ -184,6 +184,84 @@ private List<CardsDao> LoadCardsForPackage(Guid packageId, NpgsqlConnection conn
                     {
                         Console.WriteLine($"Error adding card {card.Id} to user {user.Id}: {ex.Message}");
                     }
+                }
+            }
+
+            conn.Close();
+        }
+    }
+
+    public PackageDao FindLastestPackage()
+    {
+        try
+        {
+            using (NpgsqlConnection conn = new NpgsqlConnection(DatabaseManager.ConnectionString))
+            {
+                conn.Open();
+
+                using (NpgsqlTransaction transaction = conn.BeginTransaction())
+                {
+                    try
+                    {
+                        PackageDao package = FetchLatestPackage(conn, transaction);
+                        
+                        // Load associated cards
+                        package.Cards = LoadCardsForPackage(package.Id, conn, transaction);
+
+                        transaction.Commit();
+                        return package;
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Error in transaction: {ex.Message}");
+                        transaction.Rollback();
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error fetching package by id: {ex.Message}");
+        }
+        return null!;
+    }
+    
+    private PackageDao FetchLatestPackage(NpgsqlConnection conn, NpgsqlTransaction transaction)
+    {
+        string query = "SELECT * FROM packages ORDER BY created DESC LIMIT 1";
+        using (NpgsqlCommand cmd = new NpgsqlCommand(query, conn, transaction))
+        {
+            using (NpgsqlDataReader reader = cmd.ExecuteReader())
+            {
+                if (reader.Read())
+                {
+                    return MapPackageFromDataReader(reader);
+                }
+            }
+        }
+
+        return null;
+    }
+
+    public void DeletePackage(PackageDao daoPackage)
+    {
+        string deleteQuery = "DELETE FROM packages WHERE id = @packageId";
+
+        using (NpgsqlConnection conn = new NpgsqlConnection(DatabaseManager.ConnectionString))
+        {
+            conn.Open();
+
+            using (NpgsqlCommand cmd = new NpgsqlCommand(deleteQuery, conn))
+            {
+                try
+                {
+                    cmd.Parameters.AddWithValue("@packageId", daoPackage.Id);
+
+                    cmd.ExecuteNonQuery();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error deleting package {daoPackage.Id}: {ex.Message}");
                 }
             }
 
