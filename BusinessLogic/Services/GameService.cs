@@ -7,19 +7,20 @@ namespace BusinessLogic.Services;
 
 public class GameService
 {
-    private BattleManager _battleManager = new BattleManager();
-    private UserRepository _userRepository = new UserRepository();
-    private CardsRepository _cardsRepository = new CardsRepository();
-    private GameRepository _gameRepository = new GameRepository();
+    private readonly BattleManager _battleManager = new BattleManager();
+    private readonly UserRepository _userRepository = new UserRepository();
+    private readonly CardsRepository _cardsRepository = new CardsRepository();
+    private readonly GameRepository _gameRepository = new GameRepository();
     
-    public String AttemptStartBattle(string username)
+    public string AttemptStartBattle(string username)
     {
         var player = _userRepository.GetUserByUsername(username);
-        player.Deck = _cardsRepository.GetDeck(player.Id);
+        player!.Deck = _cardsRepository.GetDeck(player.Id);
+        if (player.Deck.Count != 4)
+            throw new Exception("Deck to play must have 4 cards");
         
         _battleManager.JoinBattle(player);
         var finishedBattle = _gameRepository.FindLastBattle();
-        
         
         return finishedBattle.Log;
     }

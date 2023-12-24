@@ -99,22 +99,14 @@ namespace BusinessLogic.Utils;
             {
                 while (_battleCount <= _maxRounds)
                 {
-                    
-                    // Simulate a round of battle
-                    Monitor.Enter(_lockObject);
-                    
                     SimulateBattleRound();
                     _battleCount++;
-                    
-                    Monitor.Exit(_lockObject);
-
                 }
                 LogResult();
                 
-                // Capture battle details in the log
                 PersistBattleLog();
                 UpdatePlayerStats();
-                //  Remove players from the battle when it's completed
+                
                 ResetBattle();
             }
             catch (Exception e)
@@ -162,8 +154,8 @@ namespace BusinessLogic.Utils;
         private void SimulateBattleRound()
         {
             // take random cards from each deck
-            CardDao playerACard = _players[0].Deck[new Random().Next(_players[0].Deck.Count)];
-            CardDao playerBCard = _players[1].Deck[new Random().Next(_players[1].Deck.Count)];
+            CardDao playerACard = _players[0].Deck![new Random().Next(_players[0].Deck!.Count)];
+            CardDao playerBCard = _players[1].Deck![new Random().Next(_players[1].Deck!.Count)];
             
             Fight(playerACard, playerBCard);
             

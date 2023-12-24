@@ -48,7 +48,7 @@ CREATE TABLE user_cards
     user_id         uuid        NOT NULL REFERENCES users (id) ON DELETE CASCADE,
     card_id         uuid        NOT NULL REFERENCES cards (id) ON DELETE CASCADE,
     is_in_deck      bool        NOT NULL DEFAULT FALSE,
-    usage           varchar(255) NOT NULL DEFAULT 'NONE' 
+    usage           varchar(255) NOT NULL DEFAULT 'none' 
 );
 
 CREATE TABLE battles
@@ -68,17 +68,3 @@ CREATE TABLE trades
     minimum_damage INTEGER      NOT NULL,
     price       INTEGER         NOT NULL DEFAULT 1
 );
-
-
-
-
-
-
-
-INSERT INTO users (username, password, name, image) VALUES
-    ('user1', 'password1', 'John Doe', ':=)'),
-    ('user2', 'password2', 'Jane Smith', ':=)'),
-    ('user3', 'password3', 'Bob Johnson', ':=)'),
-    ('user4', 'password4', 'Alice Brown', ':=)'),
-    ('user5', 'password5', 'Charlie White', ':=)');
-

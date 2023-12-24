@@ -1,4 +1,5 @@
-﻿using API.HttpServer;
+﻿using System.Web;
+using API.HttpServer;
 using Api.Utils;
 using BusinessLogic.Services;
 using Newtonsoft.Json;
@@ -21,7 +22,7 @@ namespace API.Controller
             {
                 GetAllCards(e);
             }
-            else if (e.Path.Equals("/deck") && e.Method.Equals("GET"))
+            else if (e.Path.StartsWith("/deck") && e.Method.Equals("GET"))
             {
                 GetDeck(e);
             }
@@ -69,7 +70,11 @@ namespace API.Controller
                 e.Reply(204, "");
                 return;
             }
-            e.Reply(200, JsonConvert.SerializeObject(cards));
+
+            if (HttpUtility.ParseQueryString(e.Path).Get("format") == "plain")
+                e.Reply(200, string.Join(", ", cards.Select(card => card.Id)));
+            else
+                e.Reply(200, JsonConvert.SerializeObject(cards));
         }
 
         private void GetAllCards(HttpSvrEventArgs e)

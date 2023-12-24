@@ -1,5 +1,4 @@
 ﻿using BusinessLogic.Mapper;
-using BusinessLogic.Utils;
 using DataAccess.Repository;
 using Transversal.Entities;
 
@@ -7,17 +6,16 @@ namespace BusinessLogic.Services;
 
 public class CardsService
 {
-    private const int DECK_SIZE = 4;
-
-    CardsRepository _cardsRepository = new CardsRepository();
-    UserRepository _userRepository = new UserRepository();
+    private const int DeckSize = 4;
+    private readonly CardsRepository _cardsRepository = new CardsRepository();
+    private readonly UserRepository _userRepository = new UserRepository();
     
     public List<CardDto> GetAllCards(string username)
     {
         try
         {
             var user = _userRepository.GetUserByUsername(username);
-            return CardsMapper.MapToDtoList(_cardsRepository.GetAllCards(user.Id));
+            return CardsMapper.MapToDtoList(_cardsRepository.GetAllCards(user!.Id));
         }
         catch (Exception e)
         {
@@ -32,7 +30,7 @@ public class CardsService
         try
         {
             var user = _userRepository.GetUserByUsername(username);
-            return CardsMapper.MapToDtoList(_cardsRepository.GetDeck(user.Id));
+            return CardsMapper.MapToDtoList(_cardsRepository.GetDeck(user!.Id));
         }
         catch (Exception e)
         {
@@ -49,9 +47,9 @@ public class CardsService
             if (cards.Count != 4  /*|| Comparator.Unique(cards)*/)
                 throw new ArgumentException("The deck must contain 4 different cards.");
             
-            var user = _userRepository.GetUserByUsername(username);
+            var user = _userRepository.GetUserByUsername(username)!;
             
-            if(!_cardsRepository.ValidateDeckForConfiguration(user.Id, CardsMapper.MapToDaoList(cards), DECK_SIZE))
+            if(!_cardsRepository.ValidateDeckForConfiguration(user.Id, CardsMapper.MapToDaoList(cards), DeckSize))
                throw new ArgumentException("At least one of the provided cards does not belong to the user or is not available.");
             _cardsRepository.ResetDeck(user.Id);
             _cardsRepository.ConfigureDeck(user.Id, CardsMapper.MapToDaoList(cards));

@@ -8,9 +8,9 @@ namespace BusinessLogic.Services;
 
 public class PackageService
 {
-    private PackageRepository _packageRepository = new PackageRepository();
-    private CardsRepository _cardsRepository = new CardsRepository();
-    private UserRepository _userRepository = new UserRepository();
+    private readonly PackageRepository _packageRepository = new PackageRepository();
+    private readonly CardsRepository _cardsRepository = new CardsRepository();
+    private readonly UserRepository _userRepository = new UserRepository();
     
     public void CreatePackage(List<CardDto> cards)
     {
@@ -31,12 +31,12 @@ public class PackageService
 
     public void BuyCardPackage(PackageDto? dtoPackage, string username)
     {
-        var user = _userRepository.GetUserByUsername(username);
+        var user = _userRepository.GetUserByUsername(username)!;
         // Check if packages exist, check user money, transaction
         Console.WriteLine("User coins: " + user.Coins);
-        var daoPackage = new PackageDao();
         try
         {
+            PackageDao daoPackage;
             if (dtoPackage == null || dtoPackage.Id == Guid.Empty)
                 daoPackage = _packageRepository.FindLastestPackage();
             // package if empty take the first or last?

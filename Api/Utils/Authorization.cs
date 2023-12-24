@@ -5,10 +5,10 @@ namespace Api.Utils;
 
 public static class Authorization
 {
-    private static string Type { get;  set; } 
-    private static string Token { get;  set; }
+    private static string? Type { get;  set; } 
+    private static string? Token { get;  set; }
     
-    private static UserService _userService = new UserService();
+    private static readonly UserService UserService = new UserService();
     
     public static bool AuthorizeAdmin(string authorization)
     {
@@ -40,7 +40,7 @@ public static class Authorization
         if (Type != "Bearer") return false;
         if (tokenParts[1] != "mtcgToken") return false;
         
-        return _userService.UserExists(tokenParts[0]);
+        return UserService.UserExists(tokenParts[0]);
     }
 
     public static string GetUsernameFromAuthorization(string authorization)

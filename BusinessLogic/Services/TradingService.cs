@@ -6,7 +6,6 @@ namespace BusinessLogic.Services;
 
 public class TradingService
 {
-    private readonly  TradeMapper _tradeMapper = new TradeMapper();
     private readonly TradeRepository _tradeRepository = new TradeRepository();
     private readonly UserRepository _userRepository = new UserRepository();
     private readonly CardsRepository _cardRepository = new CardsRepository();
@@ -14,13 +13,11 @@ public class TradingService
     {
         try
         {
-            var user = _userRepository.GetUserByUsername(username);
             return TradeMapper.MapToDtoList(_tradeRepository.GetTrades());
         }
         catch (Exception e)
         {
             Console.WriteLine(e.Message);
-            
         }
         return new List<TradeDto>();
     }
@@ -30,7 +27,7 @@ public class TradingService
 
         try
         {
-            var user = _userRepository.GetUserByUsername(username);
+            var user = _userRepository.GetUserByUsername(username)!;
             //check card if card is available
             var userCard = _cardRepository.GetUserCardByUserAndCardId(user.Id, trade.CardId); // change to get only id
             if (userCard == null)
@@ -55,7 +52,7 @@ public class TradingService
     {
         try
         {
-            var user = _userRepository.GetUserByUsername(username);
+            var user = _userRepository.GetUserByUsername(username)!;
             var trade = _tradeRepository.GetTrade(tradeId);
             if (trade == null)
                 throw new Exception("Trade does not exist");

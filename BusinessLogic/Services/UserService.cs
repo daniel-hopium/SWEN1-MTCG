@@ -7,11 +7,11 @@ namespace BusinessLogic.Services
 {
     public class UserService
     {
-        private UserRepository _userRepository = new UserRepository();
+        private readonly UserRepository _userRepository = new UserRepository();
     
         public void CreateUser(UserDto userDto)
         {
-            userDto.Password = PasswordHasher.HashPassword(userDto.Password);
+            userDto.Password = PasswordHasher.HashPassword(userDto.Password!);
             _userRepository.CreateUser(UserMapper.MapToDao(userDto));
         }
 
@@ -27,13 +27,13 @@ namespace BusinessLogic.Services
 
         public bool Login(UserDto userDto)
         {
-            string password = userDto.Password;
-            var dbUser = UserMapper.MapToDto(_userRepository.GetUserByUsername(userDto.Username));
+            string password = userDto.Password!;
+            var dbUser = UserMapper.MapToDto(_userRepository.GetUserByUsername(userDto.Username!)!);
             
             if (dbUser == null)
                 return false;
 
-            return PasswordHasher.VerifyPassword(password, dbUser.Password);
+            return PasswordHasher.VerifyPassword(password, dbUser.Password!);
         }
 
         public bool UserExists(string username)
