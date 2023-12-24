@@ -46,7 +46,7 @@ public class CardsService
     {
         try
         {
-            if (cards.Count != DeckSize  || Comparator.Unique(cards)) 
+            if (cards.Count != DeckSize  || !Comparator.Unique(cards)) 
                 throw new InvalidDeckException("The provided deck did not include the required amount of cards");
             
             var user = _userRepository.GetUserByUsername(username)!;

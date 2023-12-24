@@ -15,6 +15,7 @@ public class UserMapper
         return new UserDto
         {
             Username = userDao.Username,
+            Password = userDao.Password,
             Name = userDao.Name,
             Bio = userDao.Bio,
             Image = userDao.Image

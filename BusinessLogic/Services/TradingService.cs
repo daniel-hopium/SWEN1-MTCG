@@ -1,6 +1,8 @@
-﻿using BusinessLogic.Mapper;
+﻿using BusinessLogic.Exceptions;
+using BusinessLogic.Mapper;
 using DataAccess.Repository;
 using Transversal.Entities;
+using static DataAccess.Repository.CardsRepository.Usage;
 
 namespace BusinessLogic.Services;
 
@@ -28,22 +30,24 @@ public class TradingService
         {
             var user = _userRepository.GetUserByUsername(username)!;
             //check card if card is available
-            var userCard = _cardRepository.GetUserCardByUserAndCardId(user.Id, trade.CardId); // change to get only id
+            var userCard = _cardRepository.GetUserCardByUserAndCardId(user.Id, trade.CardToTrade); // change to get only id
             if (userCard == null)
-                throw new Exception("Card does not exist");
+                throw new InvalidCardException("The deal contains a card that is not owned by the user or locked in the deck.");
            
             //deal exists already 
             if(_tradeRepository.Exists(trade.Id))
-                throw new Exception("Trade already exists");
+                throw new TradeAlreadyExistsException("Trade already exists");
 
             var tradeDao = TradeMapper.MapToDao(trade);
-            tradeDao.UserCardToTradeId = userCard.Id; // userCardId!
+            tradeDao.CardToTradeId = userCard.CardId; // userCardId!
             
             _tradeRepository.CreateTrade(tradeDao);
+            _cardRepository.UpdateUsage(user.Id, userCard.CardId, Trade);
         }
         catch (Exception e)
         {
             Console.WriteLine(e);
+            throw;
         }
     }
 
@@ -56,7 +60,7 @@ public class TradingService
             if (trade == null)
                 throw new Exception("Trade does not exist");
             
-            var userCard = _cardRepository.GetUserCardById(trade.UserCardToTradeId);
+            var userCard = _cardRepository.GetUserCardById(trade.CardToTradeId);
             if (userCard == null || userCard.UserId != user.Id) // Improve the null check
                 throw new Exception("User is not the owner of the trade");
             

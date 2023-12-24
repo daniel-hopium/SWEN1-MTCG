@@ -23,4 +23,9 @@ public static class Logger
     {
         Console.WriteLine($"{DateTime.Now:yyyy-MM-dd HH:mm:ss} [{level}] {message}");
     }
+    
+    public static void LogThread(string message)
+    {
+        LogInfo($"Thread-{Thread.CurrentThread.ManagedThreadId} " + message);
+    }
 }

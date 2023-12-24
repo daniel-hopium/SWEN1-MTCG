@@ -35,9 +35,9 @@ public class UserRepository
     }
 
 
-    public void CreateUser(UserDao userDao)
+    public Guid CreateUser(UserDao userDao)
     {
-        string insertQuery = "INSERT INTO users (username, password) VALUES (@username, @password)";
+        string insertQuery = "INSERT INTO users (username, password) VALUES (@username, @password) RETURNING id";
 
         using (NpgsqlConnection conn = new NpgsqlConnection(DatabaseManager.ConnectionString))
         using (NpgsqlCommand cmd = new NpgsqlCommand(insertQuery, conn))
@@ -49,16 +49,21 @@ public class UserRepository
                 cmd.Parameters.AddWithValue("@username", userDao.Username);
                 cmd.Parameters.AddWithValue("@password", userDao.Password);
 
-                cmd.ExecuteNonQuery();
+                // ExecuteScalar is used to retrieve the single value (in this case, the generated ID)
+                Guid userId = (Guid)cmd.ExecuteScalar();
+
                 conn.Close();
+
+                return userId;
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Error creating user: {ex.Message}");
+                return Guid.Empty; 
             }
         }
-        
     }
+
     
 
     private UserDao MapUserFromDataReader(NpgsqlDataReader reader)
@@ -71,9 +76,6 @@ public class UserRepository
             Password = reader["password"].ToString(),
             Image = reader["image"].ToString(),
             Coins = Convert.ToInt32(reader["coins"]),
-            Wins = Convert.ToInt32(reader["wins"]),
-            Losses = Convert.ToInt32(reader["losses"]),
-            Elo = Convert.ToInt32(reader["elo"])
         };
     }
 
@@ -200,7 +202,7 @@ public class UserRepository
         {
             using (NpgsqlConnection conn = new NpgsqlConnection(DatabaseManager.ConnectionString))
             using (NpgsqlCommand cmd = new NpgsqlCommand("SELECT * FROM users u " +
-                                                         "JOIN scoreboard s ON u.user_id = s.user_id" +
+                                                         "JOIN scoreboard s ON s.user_id = u.id " +
                                                          "WHERE u.username = @username", conn))
             {
                 conn.Open();
@@ -211,7 +213,11 @@ public class UserRepository
                 {
                     if (reader.Read())
                     {
-                        return MapUserFromDataReader(reader);
+                        var user = MapUserFromDataReader(reader);
+                        user.Wins = Convert.ToInt32(reader["wins"]);
+                        user.Losses = Convert.ToInt32(reader["losses"]);
+                        user.Elo = Convert.ToInt32(reader["elo"]);
+                        return user;
                     }
                 }
                 conn.Close();
@@ -222,6 +228,30 @@ public class UserRepository
             Console.WriteLine($"Error fetching user by username {username}: {ex.Message}");
         }
         return null; 
+    }
+
+    public void CreateUserScore(Guid userId)
+    {
+        string insertQuery = "INSERT INTO scoreboard (user_id) VALUES (@user_id)";
+
+        using (NpgsqlConnection conn = new NpgsqlConnection(DatabaseManager.ConnectionString))
+        using (NpgsqlCommand cmd = new NpgsqlCommand(insertQuery, conn))
+        {
+            try
+            {
+                conn.Open();
+
+                cmd.Parameters.AddWithValue("@user_id", userId);
+
+                cmd.ExecuteNonQuery();
+
+                conn.Close();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error creating user: {ex.Message}");
+            }
+        }
     }
 }
 

@@ -13,7 +13,8 @@ namespace BusinessLogic.Services
         public void CreateUser(UserDto userDto)
         {
             userDto.Password = PasswordHasher.HashPassword(userDto.Password!);
-            _userRepository.CreateUser(UserMapper.MapToDao(userDto));
+            var userId = _userRepository.CreateUser(UserMapper.MapToDao(userDto));
+            _userRepository.CreateUserScore(userId);
         }
 
         public UserDto UpdateUser(string oldUsername, UserDto userDto)

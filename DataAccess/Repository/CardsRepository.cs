@@ -1,11 +1,19 @@
 ﻿using Npgsql;
 using DataAccess.Daos;
 using DataAccess.Utils;
+using static DataAccess.Repository.CardsRepository.Usage;
 
 namespace DataAccess.Repository;
 
 public class CardsRepository
 {
+    public enum Usage
+    {
+        Deck,
+        Trade,
+        None
+    }
+    
     public void CreateCards(List<CardDao> cards)
 {
     if (cards == null || cards.Count == 0)
@@ -157,11 +165,12 @@ private bool CardExists(NpgsqlConnection conn, NpgsqlTransaction transaction, Gu
         try
         {
             using (NpgsqlConnection conn = new NpgsqlConnection(DatabaseManager.ConnectionString))
-            using (NpgsqlCommand cmd = new NpgsqlCommand("SELECT * FROM user_cards WHERE user_id = @userId AND is_in_deck = TRUE", conn))
+            using (NpgsqlCommand cmd = new NpgsqlCommand("SELECT * FROM user_cards WHERE user_id = @userId AND usage = @usage", conn))
             {
                 conn.Open();
 
                 cmd.Parameters.AddWithValue("@userId", userId);
+                cmd.Parameters.AddWithValue("@usage", Deck.ToString().ToLower());
 
                 using (NpgsqlDataReader reader = cmd.ExecuteReader())
                 {
@@ -188,24 +197,27 @@ private bool CardExists(NpgsqlConnection conn, NpgsqlTransaction transaction, Gu
 
     public bool ValidateDeckForConfiguration(Guid userId, List<CardDao> cards, int deckSize)
     {
+        var validCards = 0;
         try
         {
             using (NpgsqlConnection conn = new NpgsqlConnection(DatabaseManager.ConnectionString))
             {
                 conn.Open();
-
+        
                 foreach (var card in cards)
                 {
-                    using (NpgsqlCommand cmd = new NpgsqlCommand("SELECT COUNT(*) FROM user_cards WHERE user_id = @userId AND card_id = @cardId", conn))
+                    using (NpgsqlCommand cmd = new NpgsqlCommand("SELECT COUNT(*) FROM user_cards WHERE user_id = @userId AND card_id = @cardId AND usage = @usage", conn))
                     {
                         cmd.Parameters.AddWithValue("@userId", userId);
                         cmd.Parameters.AddWithValue("@cardId", card.Id);
+                        cmd.Parameters.AddWithValue("@usage", None.ToString().ToLower());
                         int count = Convert.ToInt32(cmd.ExecuteScalar());
 
                         if (count == 0)
                         {
                             throw new ArgumentException($"Card with ID {card.Id} does not belong to the user {userId} or is not available.");
                         }
+                        validCards++;
                     }
                 }
             }
@@ -216,12 +228,10 @@ private bool CardExists(NpgsqlConnection conn, NpgsqlTransaction transaction, Gu
             return false; // Indicate that an error occurred
         }
 
-        if (deckSize != 4)
-        {
-            throw new ArgumentException("Deck size must be exactly 4.");
-        }
+        if (validCards == deckSize) return true; // The deck configuration is valid
+        Console.WriteLine($"Error checking deck configuration: Deck size must be exactly {deckSize}.");
+        return false;
 
-        return true; // The deck configuration is valid
     }
 
     public void ConfigureDeck(Guid userId, List<CardDao> cards)
@@ -234,11 +244,12 @@ private bool CardExists(NpgsqlConnection conn, NpgsqlTransaction transaction, Gu
 
                 foreach (var card in cards)
                 {
-                    using (NpgsqlCommand cmd = new NpgsqlCommand("UPDATE user_cards SET is_in_deck = TRUE WHERE user_id = @userId AND card_id = @cardId", conn))
+                    using (NpgsqlCommand cmd = new NpgsqlCommand("UPDATE user_cards SET usage = @usage WHERE user_id = @userId AND card_id = @cardId", conn))
                     {
                         cmd.Parameters.Clear();
                         cmd.Parameters.AddWithValue("@userId", userId);
                         cmd.Parameters.AddWithValue("@cardId", card.Id); 
+                        cmd.Parameters.AddWithValue("@usage", Deck.ToString().ToLower());
                         cmd.ExecuteNonQuery();
                     }
                 }
@@ -255,11 +266,13 @@ private bool CardExists(NpgsqlConnection conn, NpgsqlTransaction transaction, Gu
         try
         {
             using (NpgsqlConnection conn = new NpgsqlConnection(DatabaseManager.ConnectionString))
-            using (NpgsqlCommand cmd = new NpgsqlCommand("UPDATE user_cards SET is_in_deck = FALSE WHERE user_id = @userId", conn))
+            using (NpgsqlCommand cmd = new NpgsqlCommand("UPDATE user_cards SET usage = @newUsage WHERE user_id = @userId AND usage = @oldUsage", conn))
             {
                 conn.Open();
 
                 cmd.Parameters.AddWithValue("@userId", userId);
+                cmd.Parameters.AddWithValue("@newUsage", None.ToString().ToLower());
+                cmd.Parameters.AddWithValue("@oldUsage", Deck.ToString().ToLower());
                 cmd.ExecuteNonQuery();
 
                 conn.Close();
@@ -277,12 +290,13 @@ private bool CardExists(NpgsqlConnection conn, NpgsqlTransaction transaction, Gu
         try
         {
             using (NpgsqlConnection conn = new NpgsqlConnection(DatabaseManager.ConnectionString))
-            using (NpgsqlCommand cmd = new NpgsqlCommand("SELECT * FROM user_cards WHERE card_id = @cardId AND user_id = @userId AND is_in_deck = FALSE", conn))
+            using (NpgsqlCommand cmd = new NpgsqlCommand("SELECT * FROM user_cards WHERE card_id = @cardId AND user_id = @userId AND usage = @usage", conn))
             {
                 conn.Open();
 
                 cmd.Parameters.AddWithValue("@cardId", cardId);
                 cmd.Parameters.AddWithValue("@userId", userId);
+                cmd.Parameters.AddWithValue("@usage", None.ToString().ToLower());
 
                 using (NpgsqlDataReader reader = cmd.ExecuteReader())
                 {
@@ -314,11 +328,12 @@ private bool CardExists(NpgsqlConnection conn, NpgsqlTransaction transaction, Gu
         try
         {
             using (NpgsqlConnection conn = new NpgsqlConnection(DatabaseManager.ConnectionString))
-            using (NpgsqlCommand cmd = new NpgsqlCommand("SELECT * FROM user_cards WHERE id = @userCardId AND is_in_deck = FALSE", conn))
+            using (NpgsqlCommand cmd = new NpgsqlCommand("SELECT * FROM user_cards WHERE id = @userCardId AND usage = @usage", conn))
             {
                 conn.Open();
 
                 cmd.Parameters.AddWithValue("@userCardId", userCardId);
+                cmd.Parameters.AddWithValue("@usage", None.ToString().ToLower());
 
                 using (NpgsqlDataReader reader = cmd.ExecuteReader())
                 {
@@ -362,6 +377,29 @@ private bool CardExists(NpgsqlConnection conn, NpgsqlTransaction transaction, Gu
         catch (Exception ex)
         {
             Console.WriteLine($"Error deleting user card {userCardId}: {ex.Message}");
+        }
+    }
+
+    public void UpdateUsage(Guid userId, Guid userCardCardId, Usage trade)
+    {
+        try
+        {
+            using (NpgsqlConnection conn = new NpgsqlConnection(DatabaseManager.ConnectionString))
+            using (NpgsqlCommand cmd = new NpgsqlCommand("UPDATE user_cards SET usage = @usage WHERE user_id = @userId AND card_id = @cardId", conn))
+            {
+                conn.Open();
+
+                cmd.Parameters.AddWithValue("@userId", userId);
+                cmd.Parameters.AddWithValue("@cardId", userCardCardId);
+                cmd.Parameters.AddWithValue("@usage", trade.ToString().ToLower());
+                cmd.ExecuteNonQuery();
+
+                conn.Close();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error updating usage for user {userId} and card {userCardCardId}: {ex.Message}");
         }
     }
 }

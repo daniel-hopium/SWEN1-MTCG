@@ -1,5 +1,6 @@
 ﻿using API.HttpServer;
 using Api.Utils;
+using BusinessLogic.Exceptions;
 using BusinessLogic.Services;
 using Newtonsoft.Json;
 using Transversal.Entities;
@@ -76,10 +77,24 @@ public class TradingController
         var username = Authorization.GetUsernameFromAuthorization(e.Authorization);
         var trade = JsonConvert.DeserializeObject<TradeDto>(e.Payload);
         Console.WriteLine(trade!.ToString());
-        
-        _tradingService.CreateTrade(username, trade);
-        
-        e.Reply(200, "Successfully created trade");
+
+        try
+        {
+            _tradingService.CreateTrade(username, trade);
+            e.Reply(200, "Successfully created trade");
+        }
+        catch (InvalidCardException exception)
+        {
+            e.Reply(403, exception.Message);
+        }
+        catch (TradeAlreadyExistsException exception)
+        {
+            e.Reply(409, exception.Message);
+        }
+        catch (Exception exception)
+        {
+            e.Reply(500, "Error creating trade");
+        }
     }
 
     private void GetTrades(HttpSvrEventArgs e)

@@ -13,7 +13,7 @@ public class TradeRepository
         try
         {
             using (NpgsqlConnection conn = new NpgsqlConnection(DatabaseManager.ConnectionString))
-            using (NpgsqlCommand cmd = new NpgsqlCommand("SELECT * FROM trades", conn))
+            using (NpgsqlCommand cmd = new NpgsqlCommand("SELECT * FROM trades JOIN user_cards ON trades.card_id = user_cards.card_id", conn))
             {
                 conn.Open();
 
@@ -25,9 +25,9 @@ public class TradeRepository
                             new TradeDao()
                         {
                             Id = Guid.Parse(reader["id"].ToString()),
-                            UserCardToTradeId = Guid.Parse(reader["card_to_trade"].ToString()),
+                            CardToTradeId = Guid.Parse(reader["card_id"].ToString()),
                             Type = reader["type"].ToString(),
-                            MinimumDamage = int.Parse(reader["damage"].ToString())
+                            MinimumDamage = int.Parse(reader["minimum_damage"].ToString())
                         });
                     }
                 }
@@ -74,12 +74,14 @@ public class TradeRepository
         try
         {
             using (NpgsqlConnection conn = new NpgsqlConnection(DatabaseManager.ConnectionString))
-            using (NpgsqlCommand cmd = new NpgsqlCommand("INSERT INTO trades (id, user_card_id, minimum_damage) VALUES (@id, @card_to_trade, @minimumDamage)", conn))
+            using (NpgsqlCommand cmd = new NpgsqlCommand("INSERT INTO trades (id, card_id, type, minimum_damage) VALUES (@id, @cardToTrade, @type, @minimumDamage)", conn))
             {
+                Console.WriteLine(tradeDao.CardToTradeId.ToString());
                 conn.Open();
                 cmd.Parameters.AddWithValue("id", tradeDao.Id);
-                cmd.Parameters.AddWithValue("card_to_trade", tradeDao.UserCardToTradeId);
-                cmd.Parameters.AddWithValue("damage", tradeDao.MinimumDamage);
+                cmd.Parameters.AddWithValue("cardToTrade", tradeDao.CardToTradeId);
+                cmd.Parameters.AddWithValue("type", tradeDao.Type);
+                cmd.Parameters.AddWithValue("minimumDamage", tradeDao.MinimumDamage);
                 cmd.ExecuteNonQuery();
                 conn.Close();
             }
@@ -125,7 +127,7 @@ public class TradeRepository
                         return new TradeDao()
                         {
                             Id = Guid.Parse(reader["id"].ToString()),
-                            UserCardToTradeId = Guid.Parse(reader["card_to_trade"].ToString()),
+                            CardToTradeId = Guid.Parse(reader["card_to_trade"].ToString()),
                             Type = reader["type"].ToString(),
                             MinimumDamage = int.Parse(reader["damage"].ToString())
                         };
