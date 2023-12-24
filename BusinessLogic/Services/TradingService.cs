@@ -29,15 +29,15 @@ public class TradingService
         try
         {
             var user = _userRepository.GetUserByUsername(username)!;
+            //deal exists already 
+            if(_tradeRepository.Exists(trade.Id))
+                throw new InvalidTradeException("Trade already exists");
+            
             //check card if card is available
-            var userCard = _cardRepository.GetUserCardByUserAndCardId(user.Id, trade.CardToTrade); // change to get only id
+            var userCard = _cardRepository.GetUserCardByUserAndCardId(user.Id, trade.CardToTrade, None); // change to get only id
             if (userCard == null)
                 throw new InvalidCardException("The deal contains a card that is not owned by the user or locked in the deck.");
            
-            //deal exists already 
-            if(_tradeRepository.Exists(trade.Id))
-                throw new TradeAlreadyExistsException("Trade already exists");
-
             var tradeDao = TradeMapper.MapToDao(trade);
             tradeDao.CardToTradeId = userCard.CardId; // userCardId!
             
@@ -58,43 +58,46 @@ public class TradingService
             var user = _userRepository.GetUserByUsername(username)!;
             var trade = _tradeRepository.GetTrade(tradeId);
             if (trade == null)
-                throw new Exception("Trade does not exist");
+                throw new InvalidTradeException("Trade does not exist");
             
-            var userCard = _cardRepository.GetUserCardById(trade.CardToTradeId);
+            var userCard = _cardRepository.GetUserCardByUserAndCardId(user.Id, trade.CardToTradeId, Trade);
             if (userCard == null || userCard.UserId != user.Id) // Improve the null check
-                throw new Exception("User is not the owner of the trade");
+                throw new InvalidOperationException("User is not the owner of the trade");
             
             _tradeRepository.DeleteTrade(tradeId);
+            _cardRepository.UpdateUsage(user.Id, userCard.CardId, None);
         }
         catch (Exception e)
         {
             Console.WriteLine(e);
+            throw;
         }
     }
 
-    public void CarryOutTrade(string username, Guid tradeId)
+    public void CarryOutTrade(string username, Guid tradeId, Guid cardToTrade)
     {
         try
         {
-            var user = _userRepository.GetUserByUsername(username);
-            var trade = _tradeRepository.GetTrade(tradeId);
+            var initiatingUser = _userRepository.GetUserByUsername(username)!;
+            var existingTrade = _tradeRepository.GetTrade(tradeId);
+            if (existingTrade == null)
+                throw new InvalidTradeException("Trade does not exist");
             
-            if (trade == null)
-                throw new Exception("Trade does not exist");
-    
-            // var userCard = _cardRepository.GetUserCardByUserAndCardId(user.Id, trade.UserCardToTradeId);
-            // if (userCard == null)
-            //     throw new Exception("Card does not exist");
-            // if (userCard.UserId == user.Id)
-            //     throw new Exception("User is the owner of the trade");
-            // if (userCard.Damage < trade.MinimumDamage)
-            //     throw new Exception("Card does not meet the minimum damage requirement");
-            //
-            // _cardRepository.DeleteUserCard(userCard.Id);
-            // _cardRepository.DeleteUserCard(trade.UserCardToTradeId);
-            // _cardRepository.CreateUserCard(user.Id, trade.UserCardToTradeId);
-            // _cardRepository.CreateUserCard(trade.UserId, userCard.Id);
-            // _tradeRepository.DeleteTrade(tradeId);
+            var receivingUserCard = _cardRepository.GetUserCardByCardId(existingTrade.CardToTradeId);
+            if (receivingUserCard!.UserId == initiatingUser.Id) 
+                throw new InvalidOperationException("User is the owner of the trade");
+            
+            var cardToTradeInitiatingUserCard = _cardRepository.GetUserCardByUserAndCardId(initiatingUser.Id, cardToTrade, None);
+            if (cardToTradeInitiatingUserCard == null)
+                throw new InvalidTradeException("Card does not exist or is currently in use");
+            
+            var initiatingTradeUserCard = _cardRepository.GetCardById(cardToTrade);
+            if (initiatingTradeUserCard.Damage < existingTrade.MinimumDamage || initiatingTradeUserCard.CardType != existingTrade.Type)
+                throw new InvalidTradeException("Requirements not met");
+            
+            _tradeRepository.UpdateCards(initiatingUser.Id, receivingUserCard.CardId); 
+            _tradeRepository.UpdateCards(receivingUserCard.UserId, initiatingTradeUserCard.Id); 
+            _tradeRepository.DeleteTrade(tradeId);
         }
         catch (Exception e)
         {

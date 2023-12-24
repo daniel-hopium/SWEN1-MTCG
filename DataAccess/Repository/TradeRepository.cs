@@ -1,6 +1,7 @@
 ﻿using DataAccess.Daos;
 using DataAccess.Utils;
 using Npgsql;
+using static DataAccess.Repository.CardsRepository.Usage;
 
 namespace DataAccess.Repository;
 
@@ -21,14 +22,7 @@ public class TradeRepository
                 {
                     while (reader.Read())
                     {
-                        tradingsList.Add(
-                            new TradeDao()
-                        {
-                            Id = Guid.Parse(reader["id"].ToString()),
-                            CardToTradeId = Guid.Parse(reader["card_id"].ToString()),
-                            Type = reader["type"].ToString(),
-                            MinimumDamage = int.Parse(reader["minimum_damage"].ToString())
-                        });
+                        tradingsList.Add(MapTradeFromDataReader(reader));
                     }
                 }
 
@@ -42,6 +36,16 @@ public class TradeRepository
         return tradingsList;
     }
 
+    private TradeDao MapTradeFromDataReader(NpgsqlDataReader reader)
+    {
+        return new TradeDao()
+        {
+            Id = Guid.Parse(reader["id"].ToString()),
+            CardToTradeId = Guid.Parse(reader["card_id"].ToString()),
+            Type = reader["type"].ToString(),
+            MinimumDamage = int.Parse(reader["minimum_damage"].ToString())
+        };
+    }
     public bool Exists(Guid tradeId)
     {
         try
@@ -76,7 +80,6 @@ public class TradeRepository
             using (NpgsqlConnection conn = new NpgsqlConnection(DatabaseManager.ConnectionString))
             using (NpgsqlCommand cmd = new NpgsqlCommand("INSERT INTO trades (id, card_id, type, minimum_damage) VALUES (@id, @cardToTrade, @type, @minimumDamage)", conn))
             {
-                Console.WriteLine(tradeDao.CardToTradeId.ToString());
                 conn.Open();
                 cmd.Parameters.AddWithValue("id", tradeDao.Id);
                 cmd.Parameters.AddWithValue("cardToTrade", tradeDao.CardToTradeId);
@@ -124,13 +127,7 @@ public class TradeRepository
                 {
                     if (reader.Read())
                     {
-                        return new TradeDao()
-                        {
-                            Id = Guid.Parse(reader["id"].ToString()),
-                            CardToTradeId = Guid.Parse(reader["card_to_trade"].ToString()),
-                            Type = reader["type"].ToString(),
-                            MinimumDamage = int.Parse(reader["damage"].ToString())
-                        };
+                        return MapTradeFromDataReader(reader);
                     }
                 }
 
@@ -142,5 +139,31 @@ public class TradeRepository
             Console.WriteLine($"Error getting tradings: {ex.Message}");
         }
         return null;
+    }
+
+    public void UpdateCards(Guid newUserId, Guid cardId)
+    {
+        string updateQuery = "UPDATE user_cards SET usage = @usage, user_id = @newUserId WHERE card_id = @card_id";
+
+        using (NpgsqlConnection conn = new NpgsqlConnection(DatabaseManager.ConnectionString))
+        using (NpgsqlCommand cmd = new NpgsqlCommand(updateQuery, conn))
+        {
+            try
+            {
+                conn.Open();
+
+                cmd.Parameters.AddWithValue("@user_id", newUserId);
+                cmd.Parameters.AddWithValue("@card_id", cardId);
+                cmd.Parameters.AddWithValue("@usage", None.ToString());
+
+                cmd.ExecuteNonQuery();
+
+                conn.Close();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error updating card: {ex.Message}");
+            }
+        }
     }
 }

@@ -43,12 +43,19 @@ public class TradingController
             return;
         }
         var username = Authorization.GetUsernameFromAuthorization(e.Authorization);
-        var tradeId = JsonConvert.DeserializeObject<Guid>(e.Payload);
+        var tradeId = Guid.Parse(e.PathVariable());
+        var cardToTrade = JsonConvert.DeserializeObject<Guid>(e.Payload);
+     
         Console.WriteLine(tradeId.ToString());
-        
-        _tradingService.CarryOutTrade(username, tradeId);
-        
-        e.Reply(200, "Trade successfully carried out");
+        try
+        {
+            _tradingService.CarryOutTrade(username, tradeId, cardToTrade);
+            e.Reply(200, "Trade successfully carried out");
+        }
+        catch (Exception exception)
+        {
+            e.Reply(500, "Error carrying out trade");
+        }
     }
 
     private void DeleteTrade(HttpSvrEventArgs e)
@@ -59,12 +66,27 @@ public class TradingController
             return;
         }
         var username = Authorization.GetUsernameFromAuthorization(e.Authorization);
-        var tradeId = JsonConvert.DeserializeObject<Guid>(e.Payload);
+        var tradeId = Guid.Parse(e.PathVariable());
         Console.WriteLine(tradeId.ToString());
+
+        try
+        {
+            _tradingService.DeleteTrade(username, tradeId);
+            e.Reply(200, "Successfully deleted trade");
+        }
+        catch (InvalidTradeException exception)
+        {
+            e.Reply(404, exception.Message);
+        }
+        catch (InvalidOperationException exception)
+        {
+            e.Reply(403, exception.Message);
+        }
+        catch (Exception exception)
+        {
+            e.Reply(500, "Error deleting trade");
+        }
         
-        _tradingService.DeleteTrade(username, tradeId);
-        
-        e.Reply(200, "Successfully deleted trade");
     }
 
     private void CreateTrade(HttpSvrEventArgs e)
@@ -87,7 +109,7 @@ public class TradingController
         {
             e.Reply(403, exception.Message);
         }
-        catch (TradeAlreadyExistsException exception)
+        catch (InvalidTradeException exception)
         {
             e.Reply(409, exception.Message);
         }

@@ -284,7 +284,7 @@ private bool CardExists(NpgsqlConnection conn, NpgsqlTransaction transaction, Gu
         }
     }
 
-    public UserCardDao? GetUserCardByUserAndCardId(Guid userId, Guid cardId)
+    public UserCardDao? GetUserCardByUserAndCardId(Guid userId, Guid cardId, Usage usage)
     {
         UserCardDao userCard = null;
         try
@@ -296,7 +296,7 @@ private bool CardExists(NpgsqlConnection conn, NpgsqlTransaction transaction, Gu
 
                 cmd.Parameters.AddWithValue("@cardId", cardId);
                 cmd.Parameters.AddWithValue("@userId", userId);
-                cmd.Parameters.AddWithValue("@usage", None.ToString().ToLower());
+                cmd.Parameters.AddWithValue("@usage", usage.ToString().ToLower());
 
                 using (NpgsqlDataReader reader = cmd.ExecuteReader())
                 {
@@ -339,12 +339,7 @@ private bool CardExists(NpgsqlConnection conn, NpgsqlTransaction transaction, Gu
                 {
                     if (reader.Read())
                     {
-                        return new UserCardDao()
-                        {
-                            Id = Guid.Parse(reader["id"].ToString()),
-                            UserId = Guid.Parse(reader["user_id"].ToString()),
-                            CardId = Guid.Parse(reader["card_id"].ToString())
-                        };
+                        return MapUserCardFromDataReader(reader);
                     }
                 }
 
@@ -357,6 +352,17 @@ private bool CardExists(NpgsqlConnection conn, NpgsqlTransaction transaction, Gu
         }
 
         return null;
+    }
+    
+    private UserCardDao MapUserCardFromDataReader(NpgsqlDataReader reader)
+    {
+        return new UserCardDao()
+        {
+            Id = Guid.Parse(reader["id"].ToString()),
+            UserId = Guid.Parse(reader["user_id"].ToString()),
+            CardId = Guid.Parse(reader["card_id"].ToString()),
+            Usage = (CardUsage)Enum.Parse(typeof(Usage), reader["usage"].ToString(), true)
+        };
     }
 
     public void DeleteUserCard(Guid userCardId)
@@ -401,5 +407,36 @@ private bool CardExists(NpgsqlConnection conn, NpgsqlTransaction transaction, Gu
         {
             Console.WriteLine($"Error updating usage for user {userId} and card {userCardCardId}: {ex.Message}");
         }
+    }
+
+    public UserCardDao GetUserCardByCardId(Guid cardId)
+    {
+        {
+            try
+            {
+                using (NpgsqlConnection conn = new NpgsqlConnection(DatabaseManager.ConnectionString))
+                using (NpgsqlCommand cmd = new NpgsqlCommand("SELECT * FROM user_cards WHERE card_id = @cardId", conn))
+                {
+                    conn.Open();
+
+                    cmd.Parameters.AddWithValue("@cardId", cardId);
+
+                    using (NpgsqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            return MapUserCardFromDataReader(reader);
+                        }
+                    }
+
+                    conn.Close();
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error fetching card by ID {cardId}: {ex.Message}");
+            }
+        }
+        return null;
     }
 }
