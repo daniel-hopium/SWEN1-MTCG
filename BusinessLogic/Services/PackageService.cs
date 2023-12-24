@@ -1,4 +1,5 @@
 ﻿using System.Text.RegularExpressions;
+using BusinessLogic.Exceptions;
 using BusinessLogic.Mapper;
 using DataAccess.Daos;
 using DataAccess.Repository;
@@ -25,28 +26,27 @@ public class PackageService
         catch (Exception e)
         {
             Console.WriteLine(e);
+            throw;
         }
     }
 
 
-    public void BuyCardPackage(PackageDto? dtoPackage, string username)
+    public void BuyPackage(PackageDto? dtoPackage, string username)
     {
         var user = _userRepository.GetUserByUsername(username)!;
-        // Check if packages exist, check user money, transaction
         Console.WriteLine("User coins: " + user.Coins);
         try
         {
             PackageDao daoPackage;
             if (dtoPackage == null || dtoPackage.Id == Guid.Empty)
                 daoPackage = _packageRepository.FindLastestPackage();
-            // package if empty take the first or last?
             else
                 daoPackage = _packageRepository.FindPackage(dtoPackage.Id);
             
             if (daoPackage == null)
-                throw new Exception("Package does not exist.");
+                throw new InvalidOperationException("Package does not exist.");
             if (user.Coins < daoPackage.Price)
-                throw new Exception("User does not have enough money to buy this package.");
+                throw new InsufficientFundsException("User does not have enough money to buy this package.");
             _userRepository.UpdateUserMoney(user, daoPackage.Price);
             _packageRepository.AddPackageToUser(user, daoPackage);
             _packageRepository.DeletePackage(daoPackage);

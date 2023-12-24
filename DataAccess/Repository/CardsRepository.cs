@@ -7,44 +7,68 @@ namespace DataAccess.Repository;
 public class CardsRepository
 {
     public void CreateCards(List<CardDao> cards)
+{
+    if (cards == null || cards.Count == 0)
     {
-        if (cards == null || cards.Count == 0)
-        {
-            throw new ArgumentException("The list of cards cannot be null or empty.", nameof(cards));
-        }
+        throw new ArgumentException("The list of cards cannot be null or empty.", nameof(cards));
+    }
 
-        string insertQuery = "INSERT INTO cards (id, name, damage, element_type, card_type) VALUES (@id, @name, @damage, @elementType, @cardType)";
+    string insertQuery = "INSERT INTO cards (id, name, damage, element_type, card_type) VALUES (@id, @name, @damage, @elementType, @cardType)";
 
-        using (NpgsqlConnection conn = new NpgsqlConnection(DatabaseManager.ConnectionString))
-        using (NpgsqlCommand cmd = new NpgsqlCommand(insertQuery, conn))
+    using (NpgsqlConnection conn = new NpgsqlConnection(DatabaseManager.ConnectionString))
+    {
+        conn.Open();
+
+        using (NpgsqlTransaction transaction = conn.BeginTransaction())
         {
             try
             {
-                conn.Open();
-
                 foreach (var card in cards)
                 {
-                    // Assuming Id is a Guid
-                    cmd.Parameters.AddWithValue("@id", card.Id);
-                    cmd.Parameters.AddWithValue("@name", card.Name);
-                    cmd.Parameters.AddWithValue("@damage", card.Damage);
-                    cmd.Parameters.AddWithValue("@elementType", card.ElementType != null ? card.ElementType : DBNull.Value);
-                    cmd.Parameters.AddWithValue("@cardType", card.ElementType != null ? card.CardType : DBNull.Value);
+                    // Check if the card already exists
+                    if (CardExists(conn, transaction, card.Id))
+                    {
+                        throw new InvalidOperationException($"Card with ID '{card.Id}' already exists.");
+                    }
 
-                    cmd.ExecuteNonQuery();
+                    using (NpgsqlCommand cmd = new NpgsqlCommand(insertQuery, conn, transaction))
+                    {
+                        cmd.Parameters.AddWithValue("@id", card.Id);
+                        cmd.Parameters.AddWithValue("@name", card.Name);
+                        cmd.Parameters.AddWithValue("@damage", card.Damage);
+                        cmd.Parameters.AddWithValue("@elementType", card.ElementType != null ? card.ElementType : DBNull.Value);
+                        cmd.Parameters.AddWithValue("@cardType", card.ElementType != null ? card.CardType : DBNull.Value);
 
-                    // Clear parameters for the next iteration
-                    cmd.Parameters.Clear();
+                        cmd.ExecuteNonQuery();
+                    }
                 }
 
-                conn.Close();
+                transaction.Commit();
             }
             catch (Exception ex)
             {
+                transaction.Rollback();
                 Console.WriteLine($"Error adding cards: {ex.Message}");
+            }
+            finally
+            {
+                conn.Close();
             }
         }
     }
+}
+
+private bool CardExists(NpgsqlConnection conn, NpgsqlTransaction transaction, Guid cardId)
+{
+    string checkQuery = "SELECT COUNT(*) FROM cards WHERE id = @id";
+    using (NpgsqlCommand cmd = new NpgsqlCommand(checkQuery, conn, transaction))
+    {
+        cmd.Parameters.AddWithValue("@id", cardId);
+        int count = Convert.ToInt32(cmd.ExecuteScalar());
+        return count > 0;
+    }
+}
+
 
     public List<CardDao> GetAllCards(Guid userId)
     {
@@ -180,7 +204,7 @@ public class CardsRepository
 
                         if (count == 0)
                         {
-                            throw new ArgumentException($"Card with ID {card.Id} does not belong to the user or is not available.");
+                            throw new ArgumentException($"Card with ID {card.Id} does not belong to the user {userId} or is not available.");
                         }
                     }
                 }

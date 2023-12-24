@@ -1,4 +1,6 @@
-﻿using API.HttpServer;
+﻿using System.Security.Authentication;
+using API.HttpServer;
+using Api.Utils;
 using BusinessLogic.Services;
 using Newtonsoft.Json;
 using Transversal.Entities;
@@ -46,17 +48,27 @@ public class UserController
 
     private void UpdateUserData(HttpSvrEventArgs e)
     {
-        UserDto userDto = JsonConvert.DeserializeObject<UserDto>(e.Payload)!;
-        userDto.Username = e.PathVariable();
-        
-        if (!_userService.UserExists(userDto.Username))
+        if (!Authorization.AuthorizeUser(e.Authorization))
         {
-            e.Reply(404, "User not found");
+            e.Reply(401, "Unauthorized");
             return;
         }
         
-        var updatedUser = _userService.UpdateUser(userDto);
-        e.Reply(200, JsonConvert.SerializeObject(updatedUser));
+        UserDto userDto = JsonConvert.DeserializeObject<UserDto>(e.Payload)!;
+        string username = e.PathVariable();
+        try
+        {
+            var updatedUser = _userService.UpdateUser(username, userDto);
+            e.Reply(200, JsonConvert.SerializeObject(updatedUser));
+        }
+        catch (InvalidCredentialException exception)
+        {
+            e.Reply(404, exception.Message);
+        }
+        catch (Exception exception)
+        {
+            e.Reply(500, "Error updating user");
+        }
     }
 
     private void GetUserData(HttpSvrEventArgs e)

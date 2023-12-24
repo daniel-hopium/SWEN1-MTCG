@@ -227,7 +227,7 @@ public class PackageRepository
 
     private PackageDao FetchLatestPackage(NpgsqlConnection conn, NpgsqlTransaction transaction)
     {
-        string query = "SELECT * FROM packages ORDER BY created DESC LIMIT 1";
+        string query = "SELECT * FROM packages ORDER BY created ASC LIMIT 1"; // CHANGED IT TO ASC FOR TESTING
         using (NpgsqlCommand cmd = new NpgsqlCommand(query, conn, transaction))
         {
             using (NpgsqlDataReader reader = cmd.ExecuteReader())

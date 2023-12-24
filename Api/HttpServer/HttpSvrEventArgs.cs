@@ -1,5 +1,7 @@
-﻿using System.Net.Sockets;
+﻿using System.Collections.Specialized;
+using System.Net.Sockets;
 using System.Text;
+using System.Web;
 using Microsoft.Extensions.Logging;
 using static Transversal.Utils.Logger;
 
@@ -67,7 +69,8 @@ namespace API.HttpServer
                     Payload += lines[i];
                 }
             }
-
+            Query = HttpUtility.ParseQueryString(new Uri("http://localhost" + Path).Query);
+            
             Headers = headers.ToArray();
 
             LogInfo($"Received: {Method} {Path}");
@@ -104,6 +107,12 @@ namespace API.HttpServer
         {
             get; protected set;
         } = string.Empty;
+        
+        /// <summary>Gets the query paramaters.</summary>
+        public virtual NameValueCollection Query
+        {
+            get; protected set;
+        } = new NameValueCollection();
 
 
         /// <summary>Gets the HTTP headers.</summary>

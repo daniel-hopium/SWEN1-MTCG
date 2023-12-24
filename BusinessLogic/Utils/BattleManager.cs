@@ -52,7 +52,7 @@ class BattleManager
             else
             {
                 Console.WriteLine(player.Username + " started into battle " );
-                battle.EnterBattle();
+                battle.Run();
             }
             Monitor.PulseAll(_lockObject);
         }
@@ -71,14 +71,15 @@ class BattleManager
     class Battle
     {
         private readonly GameRepository _gameRepository = new GameRepository();
-        private readonly UserRepository _userRepository = new UserRepository();
         
         private readonly object _lockObject = new object();
         private readonly List<UserDao> _players = new List<UserDao>();
         private readonly List<short> _playerWins = Enumerable.Repeat((short)0, 2).ToList(); 
         private readonly List<string> _battleLog = new List<string>();
         private static int _battleCount = 0;
-        private readonly int _maxRounds = 10;
+        private const int MaxRounds = 10;
+        
+        public bool IsFull => _players.Count == 2;
 
         public void Join(UserDao player)
         {
@@ -89,7 +90,7 @@ class BattleManager
             }
         }
 
-        public void EnterBattle()
+        public void Run()
         {
             
             Console.WriteLine("Battle is starting....");
@@ -97,7 +98,7 @@ class BattleManager
         
             try
             {
-                while (_battleCount <= _maxRounds)
+                while (_battleCount <= MaxRounds)
                 {
                     SimulateBattleRound();
                     _battleCount++;
@@ -115,42 +116,9 @@ class BattleManager
                 ResetBattle();
             }
             
-            Console.WriteLine($"Battle completed.");
-        }
-
-        private void LogResult()
-        {
-            string log = $"PlayerA: {_players[0].Username} wins {_playerWins[0]} rounds. PlayerB: {_players[1].Username} wins {_playerWins[1]} rounds. Draws: {_battleCount - _playerWins[0] - _playerWins[1]}";
-            LogInfo(log);
-            _battleLog.Add(log);
-        }
-
-        private void UpdatePlayerStats()
-        {
-            _userRepository.UpdateStats(_players[0], _playerWins[0] > _playerWins[1]);
-            _userRepository.UpdateStats(_players[1], _playerWins[1] > _playerWins[0]);
-            
+            Console.WriteLine("Battle completed.");
         }
         
-        private void PersistBattleLog()
-        {
-            _gameRepository.SaveBattle(new BattleDao()
-            {
-                WinnerId = _playerWins[0] > _playerWins[1] ? _players[0].Id : _players[1].Id,
-                OpponentId = _playerWins[0] > _playerWins[1] ? _players[1].Id : _players[0].Id,
-                Log = string.Join("\n", _battleLog),
-            });
-        }
-
-        private void ResetBattle()
-        {
-            _players.Clear();
-            _playerWins[0] = 0;
-            _playerWins[1] = 0;
-            _battleLog.Clear();
-            _battleCount = 0;
-        }
-
         private void SimulateBattleRound()
         {
             // take random cards from each deck
@@ -190,39 +158,6 @@ class BattleManager
                 
                 LogInfo(log);
                 _battleLog.Add(log);
-        }
-
-        private Effects CheckEffect(CardDao actualCard, CardDao comparisonCard)
-        {
-            Effects effect = Effects.None;
-            switch (actualCard.CardType)
-            {
-                case "goblin":
-                    if (comparisonCard.CardType == "dragon")
-                        effect = Effects.Afraid;
-                    break;
-                case "wizzard":
-                    if (comparisonCard.CardType == "ork")
-                        effect = Effects.Controlled;
-                    break;
-                case "knight":
-                    if (comparisonCard.CardType == "spell" && comparisonCard.ElementType == "water")
-                        effect = Effects.Drowned;
-                    break;
-                case "kraken":
-                    if (comparisonCard.CardType == "spell")
-                        effect = Effects.Immune;
-                    break;
-                case "elve":
-                    if (actualCard.ElementType == "fire" && comparisonCard.CardType == "dragon")
-                        effect = Effects.Evade;
-                    break;
-                default:
-                    effect = Effects.None;
-                    break;
-            }
-
-            return effect;
         }
 
         private double CalculateDamage(CardDao actualCard, CardDao cardToCompare)
@@ -275,12 +210,70 @@ class BattleManager
             return damage;
         }
         
-        private void Log(string message)
+        private Effects CheckEffect(CardDao actualCard, CardDao comparisonCard)
         {
-            Console.WriteLine($"Thread-{Thread.CurrentThread.ManagedThreadId}: {message}");
+            Effects effect = Effects.None;
+            switch (actualCard.CardType)
+            {
+                case "goblin":
+                    if (comparisonCard.CardType == "dragon")
+                        effect = Effects.Afraid;
+                    break;
+                case "wizzard":
+                    if (comparisonCard.CardType == "ork")
+                        effect = Effects.Controlled;
+                    break;
+                case "knight":
+                    if (comparisonCard.CardType == "spell" && comparisonCard.ElementType == "water")
+                        effect = Effects.Drowned;
+                    break;
+                case "kraken":
+                    if (comparisonCard.CardType == "spell")
+                        effect = Effects.Immune;
+                    break;
+                case "elve":
+                    if (actualCard.ElementType == "fire" && comparisonCard.CardType == "dragon")
+                        effect = Effects.Evade;
+                    break;
+                default:
+                    effect = Effects.None;
+                    break;
+            }
+
+            return effect;
+        }
+        
+        private void LogResult()
+        {
+            string log = $"PlayerA: {_players[0].Username} wins {_playerWins[0]} rounds. PlayerB: {_players[1].Username} wins {_playerWins[1]} rounds. Draws: {_battleCount - _playerWins[0] - _playerWins[1]}";
+            LogInfo(log);
+            _battleLog.Add(log);
         }
 
-        public bool IsFull => _players.Count == 2;
+        private void PersistBattleLog()
+        {
+            _gameRepository.SaveBattle(new BattleDao()
+            {
+                WinnerId = _playerWins[0] > _playerWins[1] ? _players[0].Id : _players[1].Id,
+                OpponentId = _playerWins[0] > _playerWins[1] ? _players[1].Id : _players[0].Id,
+                Log = string.Join("\n", _battleLog),
+            });
+        }
+        
+        private void UpdatePlayerStats()
+        {
+            _gameRepository.UpdateStats(_players[0], _playerWins[0] > _playerWins[1]);
+            _gameRepository.UpdateStats(_players[1], _playerWins[1] > _playerWins[0]);
+        }
+        
+        private void ResetBattle()
+        {
+            _players.Clear();
+            _playerWins[0] = 0;
+            _playerWins[1] = 0;
+            _battleLog.Clear();
+            _battleCount = 0;
+        }
     }
 }
 

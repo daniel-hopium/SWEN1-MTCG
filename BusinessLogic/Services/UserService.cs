@@ -1,4 +1,5 @@
-﻿using BusinessLogic.Mapper;
+﻿using System.Security.Authentication;
+using BusinessLogic.Mapper;
 using BusinessLogic.Utils;
 using DataAccess.Repository;
 using Transversal.Entities;
@@ -15,14 +16,34 @@ namespace BusinessLogic.Services
             _userRepository.CreateUser(UserMapper.MapToDao(userDto));
         }
 
-        public UserDto UpdateUser(UserDto userDto)
+        public UserDto UpdateUser(string oldUsername, UserDto userDto)
         {
-            return UserMapper.MapToDto(_userRepository.UpdateUser(UserMapper.MapToDao(userDto)));
+            try
+            {
+                var oldUser = _userRepository.GetUserByUsername(oldUsername)!;
+                if(oldUser == null)
+                    throw new InvalidCredentialException("User not found");
+                oldUser.Username = userDto.Name; // Name to username...
+                oldUser.Bio = userDto.Bio;
+                oldUser.Image = userDto.Image;
+                
+                return UserMapper.MapToDto(_userRepository.UpdateUser(oldUser));
+            }
+            catch (InvalidCredentialException e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw new Exception("Error updating user");
+            }
         }
 
         public UserDto GetUser(string username)
         {
-            return UserMapper.MapToDto(_userRepository.GetUserByUsername(username));
+            return UserMapper.MapToDto(_userRepository.GetUserByUsername(username)!);
         }
 
         public bool Login(UserDto userDto)

@@ -1,7 +1,9 @@
 ﻿using BusinessLogic.Mapper;
 using BusinessLogic.Utils;
+using DataAccess.Daos;
 using DataAccess.Repository;
 using Transversal.Entities;
+using static BusinessLogic.Services.CardsService;
 
 namespace BusinessLogic.Services;
 
@@ -12,27 +14,34 @@ public class GameService
     private readonly CardsRepository _cardsRepository = new CardsRepository();
     private readonly GameRepository _gameRepository = new GameRepository();
     
-    public string AttemptStartBattle(string username)
+    public string StartBattle(string username)
     {
-        var player = _userRepository.GetUserByUsername(username);
-        player!.Deck = _cardsRepository.GetDeck(player.Id);
-        if (player.Deck.Count != 4)
-            throw new Exception("Deck to play must have 4 cards");
+        try
+        {
+            var player = _userRepository.GetUserWithScoreByUsername(username);
+            player!.Deck = _cardsRepository.GetDeck(player.Id);
+            if (player.Deck.Count != DeckSize)
+                throw new Exception("Deck to play must have 4 cards");
         
-        _battleManager.JoinBattle(player);
-        var finishedBattle = _gameRepository.FindLastBattle();
+            _battleManager.JoinBattle(player);
+            var finishedBattle = _gameRepository.FindLastBattle();
         
-        return finishedBattle.Log;
+            return finishedBattle.Log;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
     }
 
-    public List<UserDto> GetScoreboard()
+    public List<UserScoreboardDto> GetScoreboard()
     {
-        var scoreboard = _userRepository.GetScoreboard();
-        return UserMapper.MapToDto(scoreboard);
+        return UserScoreboardMapper.MapToDtoList(_gameRepository.GetScoreboard());
     }
 
-    public UserDto GetUserStats(string username)
+    public UserScoreboardDto GetUserStats(string username)
     {
-        return UserMapper.MapToDto(_userRepository.GetUserByUsername(username)!);
+        return UserScoreboardMapper.MapToDto(_gameRepository.GetScoreboardEntry(username)!);
     }
 }

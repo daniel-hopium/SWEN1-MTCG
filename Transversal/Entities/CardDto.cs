@@ -7,5 +7,14 @@ public class CardDto
     public double Damage { get; set; }
     public string? ElementType { get; set; }
     public string? CardType { get; set; }
-    
+
+    public override bool Equals(object? obj)
+    {
+        return base.Equals(obj);
+    }
+
+    public override int GetHashCode()
+    {
+        return base.GetHashCode();
+    }
 }

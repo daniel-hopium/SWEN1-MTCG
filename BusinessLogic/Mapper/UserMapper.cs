@@ -21,6 +21,21 @@ public class UserMapper
         };
     }
     
+    public static UserDto MapToDtoWithStats(UserDao userDao)
+    {
+        if (userDao == null)
+        {
+            return null;
+        }
+
+        return new UserDto
+        {
+            Username = userDao.Username,
+            Bio = userDao.Bio,
+            Image = userDao.Image,
+        };
+    }
+    
     public static UserDao MapToDao(UserDto userDto)
     {
         if (userDto == null)

@@ -26,7 +26,6 @@ public class UserRepository
                 }
                 conn.Close();
             }
-
         }
         catch (Exception ex)
         {
@@ -51,9 +50,7 @@ public class UserRepository
                 cmd.Parameters.AddWithValue("@password", userDao.Password);
 
                 cmd.ExecuteNonQuery();
-                
                 conn.Close();
-                
             }
             catch (Exception ex)
             {
@@ -75,20 +72,22 @@ public class UserRepository
             Image = reader["image"].ToString(),
             Coins = Convert.ToInt32(reader["coins"]),
             Wins = Convert.ToInt32(reader["wins"]),
-            Losses = Convert.ToInt32(reader["losses"])
+            Losses = Convert.ToInt32(reader["losses"]),
+            Elo = Convert.ToInt32(reader["elo"])
         };
     }
 
     public UserDao UpdateUser(UserDao userDao)
     {
         using (NpgsqlConnection conn = new NpgsqlConnection(DatabaseManager.ConnectionString))
-        using (NpgsqlCommand cmd = new NpgsqlCommand("UPDATE users SET bio = @bio, image = @image WHERE username = @username RETURNING *", DatabaseManager.DbConnection))
+        using (NpgsqlCommand cmd = new NpgsqlCommand("UPDATE users SET username = @username, bio = @bio, image = @image WHERE id = @id ", conn))
         {
             conn.Open();
             
             cmd.Parameters.AddWithValue("@username", userDao.Username);
             cmd.Parameters.AddWithValue("@bio", userDao.Bio);
             cmd.Parameters.AddWithValue("@image", userDao.Image);
+            cmd.Parameters.AddWithValue("@id", userDao.Id);
 
             using (NpgsqlDataReader reader = cmd.ExecuteReader())
             {
@@ -193,6 +192,36 @@ public class UserRepository
             Console.WriteLine(e);
             return null;
         }
+    }
+
+    public UserDao GetUserWithScoreByUsername(string username)
+    {
+        try
+        {
+            using (NpgsqlConnection conn = new NpgsqlConnection(DatabaseManager.ConnectionString))
+            using (NpgsqlCommand cmd = new NpgsqlCommand("SELECT * FROM users u " +
+                                                         "JOIN scoreboard s ON u.user_id = s.user_id" +
+                                                         "WHERE u.username = @username", conn))
+            {
+                conn.Open();
+            
+                cmd.Parameters.AddWithValue("@username", username);
+
+                using (NpgsqlDataReader reader = cmd.ExecuteReader())
+                {
+                    if (reader.Read())
+                    {
+                        return MapUserFromDataReader(reader);
+                    }
+                }
+                conn.Close();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error fetching user by username {username}: {ex.Message}");
+        }
+        return null; 
     }
 }
 

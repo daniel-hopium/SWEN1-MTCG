@@ -11,8 +11,9 @@ namespace DataAccess.Daos
         public string? Bio { get; set; }
         public string? Image { get; set; }
         public int Coins { get; set; }
-        public int Wins { get; set; }
-        public int Losses { get; set; }
+        public int? Wins { get; set; }
+        public int? Losses { get; set; }
+        public int? Elo { get; set; }
         
         public List<CardDao>? Deck { get; set; }
     }    

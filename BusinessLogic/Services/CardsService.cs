@@ -1,4 +1,6 @@
-﻿using BusinessLogic.Mapper;
+﻿using BusinessLogic.Exceptions;
+using BusinessLogic.Mapper;
+using BusinessLogic.Utils;
 using DataAccess.Repository;
 using Transversal.Entities;
 
@@ -6,7 +8,7 @@ namespace BusinessLogic.Services;
 
 public class CardsService
 {
-    private const int DeckSize = 4;
+    public static readonly int DeckSize = 4;
     private readonly CardsRepository _cardsRepository = new CardsRepository();
     private readonly UserRepository _userRepository = new UserRepository();
     
@@ -20,9 +22,9 @@ public class CardsService
         catch (Exception e)
         {
             Console.WriteLine(e);
+            throw;
             
         }
-        return new List<CardDto>();
     }
 
     public List<CardDto> GetDeck(string username)
@@ -44,13 +46,13 @@ public class CardsService
     {
         try
         {
-            if (cards.Count != 4  /*|| Comparator.Unique(cards)*/) 
-                throw new ArgumentException("The deck must contain 4 different cards.");
+            if (cards.Count != DeckSize  || Comparator.Unique(cards)) 
+                throw new InvalidDeckException("The provided deck did not include the required amount of cards");
             
             var user = _userRepository.GetUserByUsername(username)!;
             
             if(!_cardsRepository.ValidateDeckForConfiguration(user.Id, CardsMapper.MapToDaoList(cards), DeckSize))
-                throw new ArgumentException("At least one of the provided cards does not belong to the user or is not available.");
+                throw new InvalidCardException("At least one of the provided cards does not belong to the user or is not available.");
             _cardsRepository.ResetDeck(user.Id);
             _cardsRepository.ConfigureDeck(user.Id, CardsMapper.MapToDaoList(cards));
         }
