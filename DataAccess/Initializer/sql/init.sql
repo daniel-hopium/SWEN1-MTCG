@@ -1,8 +1,4 @@
-﻿CREATE DATABASE trading_card_game_db;
-
-\c trading_card_game_db;
-
-
+﻿
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 CREATE TABLE IF NOT EXISTS users (
@@ -44,7 +40,6 @@ CREATE TABLE IF NOT EXISTS user_cards
     id              uuid            DEFAULT uuid_generate_v4() PRIMARY KEY,
     user_id         uuid            NOT NULL REFERENCES users (id) ON DELETE CASCADE,
     card_id         uuid            NOT NULL REFERENCES cards (id) ON DELETE CASCADE,
-    is_in_deck      bool            NOT NULL DEFAULT FALSE,
     usage           varchar(255)    NOT NULL DEFAULT 'none' 
 );
 
@@ -59,7 +54,7 @@ CREATE TABLE IF NOT EXISTS battles
 
 CREATE TABLE IF NOT EXISTS scoreboard
 (
-    id              uuid            PRIMARY KEY,
+    id              uuid            DEFAULT uuid_generate_v4() PRIMARY KEY,
     user_id         uuid            NOT NULL REFERENCES users (id) ON DELETE CASCADE,
     elo             INTEGER         NOT NULL DEFAULT 1000,
     wins            INTEGER         NOT NULL DEFAULT 0,
@@ -71,7 +66,8 @@ CREATE TABLE IF NOT EXISTS trades
 (
     id              uuid            PRIMARY KEY,
     created         TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    user_card_id    uuid            NOT NULL REFERENCES user_cards (id) ON DELETE CASCADE,
+    card_id         uuid            NOT NULL REFERENCES cards(id) ON DELETE CASCADE,
+    type            VARCHAR(255)    NOT NULL,
     minimum_damage  INTEGER         NOT NULL,
     price           INTEGER         NOT NULL DEFAULT 1
 );

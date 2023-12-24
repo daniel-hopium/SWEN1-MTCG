@@ -1,10 +1,9 @@
-﻿using System.Data;
-using Npgsql;
+﻿using Npgsql;
 
 namespace DataAccess.Utils;
 public class DatabaseManager
 {
-    private const string DefaultConnectionString = "Host=127.0.0.1;Port=5432;Username=postgres;Password=postgres;Database=postgres";
+    private const string DefaultConnectionString = "Host=127.0.0.1;Port=5432;Username=postgres;Password=postgres;Database=trading_card_game_db";
     private static NpgsqlConnection? _dbConnection;
 
     // Public property to access the database connection string
@@ -29,23 +28,72 @@ public class DatabaseManager
         }
     }
 
-    // Method to open the database connection
-    public static void OpenDatabaseConnection()
+    //Method to run initial sql script
+    public static void Initialize()
     {
-        if (_dbConnection == null)
+        if (IsDatabaseSetup())
+        {
+            return;
+        }
+        try
         {
             _dbConnection = new NpgsqlConnection(ConnectionString);
             _dbConnection.Open();
+            string filePath = "../../../../DataAccess/Initializer/sql/init.sql";
+            var sql = System.IO.File.ReadAllText(filePath);
+            var cmd = new NpgsqlCommand(sql, _dbConnection);
+            cmd.ExecuteNonQuery();
+            _dbConnection.Close();
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+        }
+
+        Console.WriteLine("Database setup complete");
+    }
+    
+    //  Check if database is already setup
+    private static bool IsDatabaseSetup()
+    {
+        try
+        {
+            _dbConnection = new NpgsqlConnection(ConnectionString);
+            _dbConnection.Open();
+
+            // Check the existence of necessary tables
+            if (TableExists("users") && 
+                TableExists("cards") && 
+                TableExists("user_cards") && 
+                TableExists("battles") && 
+                TableExists("packages") && 
+                TableExists("package_cards") && 
+                TableExists("scoreboard"))
+            {
+                _dbConnection.Close();
+                
+                return true;
+            }
+
+            _dbConnection.Close();
+            return false;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            return false;
         }
     }
 
-    // Method to close the database connection
-    public static void CloseDatabaseConnection()
+    private static bool TableExists(string tableName)
     {
-        if (_dbConnection is { State: ConnectionState.Open })
+        var sql = $"SELECT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = '{tableName}')";
+
+        using (var cmd = new NpgsqlCommand(sql, _dbConnection))
         {
-            _dbConnection.Close();
-            _dbConnection.Dispose();
+            // ExecuteScalar is used to retrieve a single value (true or false)
+            return (bool)cmd.ExecuteScalar();
         }
     }
+    
 }
