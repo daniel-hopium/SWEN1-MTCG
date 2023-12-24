@@ -5,14 +5,14 @@ namespace BusinessLogic.Mapper;
 
 public class UserMapper
 {
-    public static User MapToEntity(UserDao userDao)
+    public static UserDto MapToDto(UserDao userDao)
     {
         if (userDao == null)
         {
             return null;
         }
 
-        return new User
+        return new UserDto
         {
             Username = userDao.Username,
             Password = userDao.Password,
@@ -22,20 +22,29 @@ public class UserMapper
         };
     }
     
-    public static UserDao MapToDao(User user)
+    public static UserDao MapToDao(UserDto userDto)
     {
-        if (user == null)
+        if (userDto == null)
         {
             return null;
         }
 
         return new UserDao
         {
-            Username = user.Username,
-            Password = user.Password,
-            Name = user.Name,
-            Bio = user.Bio,
-            Image = user.Image
+            Username = userDto.Username,
+            Password = userDto.Password,
+            Name = userDto.Name,
+            Bio = userDto.Bio,
+            Image = userDto.Image
         };
+    }
+    public static List<UserDto> MapToDto(List<UserDao> userDaos)
+    {
+        if (userDaos == null)
+        {
+            return null;
+        }
+
+        return userDaos.Select(MapToDto).ToList();
     }
 }

@@ -1,5 +1,4 @@
 ﻿using API.HttpServer;
-using Api.Models;
 using Api.Utils;
 using BusinessLogic.Services;
 using Newtonsoft.Json;
@@ -9,7 +8,7 @@ namespace API.Controller
 {
     public class PackageController
     {
-        private PackageService _packageService;
+        private readonly PackageService _packageService;
         
         public PackageController(PackageService packageService)
         {
@@ -48,7 +47,6 @@ namespace API.Controller
             {
                 e.Reply(400, exception.Message);
             }
-            
         }
 
         private void CreatePackages(HttpSvrEventArgs e)
@@ -60,7 +58,7 @@ namespace API.Controller
             }
             
             var cards = JsonConvert.DeserializeObject<List<CardDto>>(e.Payload);
-            _packageService.CreatePackage(cards);
+            _packageService.CreatePackage(cards!);
             e.Reply(201, "Package and cards successfully created");
             
         }

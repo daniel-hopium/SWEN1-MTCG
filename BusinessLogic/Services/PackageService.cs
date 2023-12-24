@@ -29,11 +29,11 @@ public class PackageService
     }
 
 
-    public void BuyCardPackage(PackageDto dtoPackage, string username)
+    public void BuyCardPackage(PackageDto? dtoPackage, string username)
     {
         var user = _userRepository.GetUserByUsername(username);
         // Check if packages exist, check user money, transaction
-        Console.WriteLine(user.Coins);
+        Console.WriteLine("User coins: " + user.Coins);
         var daoPackage = new PackageDao();
         try
         {
@@ -66,13 +66,13 @@ public class PackageService
             
             if (splitStrings.Length == 2)
             {
-                card.ElementType = splitStrings[0];
-                card.CardType = splitStrings[1];
+                card.ElementType = splitStrings[0].ToLower();
+                card.CardType = splitStrings[1].ToLower();
             }
             else
             {
-                card.CardType = card.Name;
-                card.ElementType = "None";
+                card.CardType = card.Name.ToLower();
+                card.ElementType = "regular";
             }
         }
         return cards;

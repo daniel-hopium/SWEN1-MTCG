@@ -139,6 +139,62 @@ namespace DataAccess.Repository
                 conn.Close();
             }
         }
+
+        public void UpdateStats(UserDao player, bool Win)
+        {
+            using (NpgsqlConnection conn = new NpgsqlConnection(DatabaseManager.ConnectionString))
+            using (NpgsqlCommand cmd = new NpgsqlCommand("UPDATE users SET wins = @wins, losses = @losses WHERE username = @username", conn))
+            {
+                conn.Open();
+                
+                cmd.Parameters.AddWithValue("@username", player.Username);
+                if (Win)
+                {
+                    cmd.Parameters.AddWithValue("@wins", player.Wins + 1);
+                    cmd.Parameters.AddWithValue("@losses", player.Losses);
+                }
+                else
+                {
+                    cmd.Parameters.AddWithValue("@wins", player.Wins );
+                    cmd.Parameters.AddWithValue("@losses", player.Losses + 1);
+                }
+                cmd.ExecuteNonQuery();
+                
+                conn.Close();
+            }
+        }
+
+        public List<UserDao> GetScoreboard()
+        {
+            try
+            {
+                using (NpgsqlConnection conn = new NpgsqlConnection(DatabaseManager.ConnectionString))
+                using (NpgsqlCommand cmd = new NpgsqlCommand("SELECT username, wins, losses FROM users ORDER BY wins DESC", conn))
+                {
+                    conn.Open();
+                    
+                    using (NpgsqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        List<UserDao> users = new List<UserDao>();
+                        while (reader.Read())
+                        {
+                            users.Add(new UserDao
+                            {
+                                Username = reader["username"].ToString(),
+                                Wins = Convert.ToInt32(reader["wins"]),
+                                Losses = Convert.ToInt32(reader["losses"])
+                            });
+                        }
+                        return users;
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return null;
+            }
+        }
     }
 }
 

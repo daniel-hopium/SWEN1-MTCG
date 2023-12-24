@@ -9,26 +9,26 @@ namespace BusinessLogic.Services
     {
         private UserRepository _userRepository = new UserRepository();
     
-        public void CreateUser(User user)
+        public void CreateUser(UserDto userDto)
         {
-            user.Password = PasswordHasher.HashPassword(user.Password);
-            _userRepository.CreateUser(UserMapper.MapToDao(user));
+            userDto.Password = PasswordHasher.HashPassword(userDto.Password);
+            _userRepository.CreateUser(UserMapper.MapToDao(userDto));
         }
 
-        public User UpdateUser(User user)
+        public UserDto UpdateUser(UserDto userDto)
         {
-            return UserMapper.MapToEntity(_userRepository.UpdateUser(UserMapper.MapToDao(user)));
+            return UserMapper.MapToDto(_userRepository.UpdateUser(UserMapper.MapToDao(userDto)));
         }
 
-        public User GetUser(string username)
+        public UserDto GetUser(string username)
         {
-            return UserMapper.MapToEntity(_userRepository.GetUserByUsername(username));
+            return UserMapper.MapToDto(_userRepository.GetUserByUsername(username));
         }
 
-        public bool Login(User user)
+        public bool Login(UserDto userDto)
         {
-            string password = user.Password;
-            var dbUser = UserMapper.MapToEntity(_userRepository.GetUserByUsername(user.Username));
+            string password = userDto.Password;
+            var dbUser = UserMapper.MapToDto(_userRepository.GetUserByUsername(userDto.Username));
             
             if (dbUser == null)
                 return false;

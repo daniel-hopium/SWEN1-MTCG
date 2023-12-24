@@ -7,7 +7,7 @@ namespace API.Controller
 {
     public class UserController
     {
-        private UserService _userService;
+        private readonly UserService _userService;
         
         public UserController(UserService userService)
         {
@@ -37,11 +37,11 @@ namespace API.Controller
 
         private void Login(HttpSvrEventArgs e)
         {
-           var user = JsonConvert.DeserializeObject<User>(e.Payload);
+           var user = JsonConvert.DeserializeObject<UserDto>(e.Payload);
 
-            if (_userService.Login(user))
+            if (_userService.Login(user!))
             {
-                e.Reply(200, $"{user.Username}-mtcgToken");
+                e.Reply(200, $"{user!.Username}-mtcgToken");
             }
             else
             {
@@ -51,16 +51,16 @@ namespace API.Controller
 
         private void UpdateUserData(HttpSvrEventArgs e)
         {
-            User user = JsonConvert.DeserializeObject<User>(e.Payload);
-            user!.Username = e.PathVariable();
+            UserDto userDto = JsonConvert.DeserializeObject<UserDto>(e.Payload)!;
+            userDto.Username = e.PathVariable();
             
-            if (!_userService.UserExists(user.Username))
+            if (!_userService.UserExists(userDto.Username))
             {
                 e.Reply(404, "User not found");
                 return;
             }
             
-            var updatedUser = _userService.UpdateUser(user);
+            var updatedUser = _userService.UpdateUser(userDto);
             e.Reply(200, JsonConvert.SerializeObject(updatedUser));
         }
 
@@ -78,7 +78,7 @@ namespace API.Controller
 
         private void CreateUser(HttpSvrEventArgs e)
         {
-            var user = JsonConvert.DeserializeObject<User>(e.Payload);
+            var user = JsonConvert.DeserializeObject<UserDto>(e.Payload);
             
             if (user == null) 
             {
@@ -86,7 +86,7 @@ namespace API.Controller
                 return;
             }
             
-            if (_userService.UserExists(user.Username))
+            if (_userService.UserExists(user.Username!))
             {
                 e.Reply(409, "User with same username already registered");
                 return;

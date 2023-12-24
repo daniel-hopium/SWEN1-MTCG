@@ -8,7 +8,7 @@ namespace API.Controller
 {
     public class TradingController
     {
-        private TradingService _tradingService;
+        private readonly TradingService _tradingService;
         
         public TradingController(TradingService tradingService)
         {
@@ -77,7 +77,7 @@ namespace API.Controller
             }
             var username = Authorization.GetUsernameFromAuthorization(e.Authorization);
             var trade = JsonConvert.DeserializeObject<TradeDto>(e.Payload);
-            Console.WriteLine(trade.ToString());
+            Console.WriteLine(trade!.ToString());
             
             _tradingService.CreateTrade(username, trade);
             

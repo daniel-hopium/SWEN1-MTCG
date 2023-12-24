@@ -1,12 +1,13 @@
 ﻿using API.HttpServer;
 using Api.Utils;
 using BusinessLogic.Services;
+using Newtonsoft.Json;
 
 namespace API.Controller
 {
     public class GameController
     {
-        private GameService _gameService;
+        private readonly GameService _gameService;
         
         public GameController(GameService gameService)
         {
@@ -39,17 +40,30 @@ namespace API.Controller
             }
             var username = Authorization.GetUsernameFromAuthorization(e.Authorization);
             var battleStats = _gameService.AttemptStartBattle(username);
-            e.Reply(200, battleStats);
+            e.Reply(200, JsonConvert.SerializeObject(battleStats));
         }
 
         private void GetScoreboard(HttpSvrEventArgs e)
         {
-            throw new NotImplementedException();
+            if (!Authorization.AuthorizeUser(e.Authorization))
+            {
+                e.Reply(401, "Unauthorized");
+                return;
+            }
+            var userList = _gameService.GetScoreboard();
+            e.Reply(200, JsonConvert.SerializeObject(userList));
         }
 
         private void GetStats(HttpSvrEventArgs e)
         {
-            throw new NotImplementedException();
+            if (!Authorization.AuthorizeUser(e.Authorization))
+            {
+                e.Reply(401, "Unauthorized");
+                return;
+            }
+            var username = Authorization.GetUsernameFromAuthorization(e.Authorization);
+            var user = _gameService.GetUserStats(username);
+            e.Reply(200, JsonConvert.SerializeObject(user));
         }
     }
 }

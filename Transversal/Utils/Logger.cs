@@ -4,7 +4,7 @@ using System;
 
 public static class Logger
 {
-    public static void LogInformation(string message)
+    public static void LogInfo(string message)
     {
         Log("INFO", message);
     }

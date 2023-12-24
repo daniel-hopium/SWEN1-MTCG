@@ -46,7 +46,7 @@ public class CardsService
     {
         try
         {
-            if (cards.Count != 4  || Comparator.Unique(cards))
+            if (cards.Count != 4  /*|| Comparator.Unique(cards)*/)
                 throw new ArgumentException("The deck must contain 4 different cards.");
             
             var user = _userRepository.GetUserByUsername(username);
@@ -59,7 +59,8 @@ public class CardsService
         catch (Exception e)
         {
             Console.WriteLine(e.Message);
-            
+            throw;
+
         }
     }
 }

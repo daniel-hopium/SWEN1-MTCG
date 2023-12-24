@@ -13,7 +13,6 @@ CREATE TABLE users (
     image       Varchar(50)     ,
     bio         TEXT            ,
     coins       INTEGER         NOT NULL DEFAULT 20,
-    elo         INTEGER         NOT NULL DEFAULT 100,
     wins        INTEGER         NOT NULL DEFAULT 0,
     losses      INTEGER         NOT NULL DEFAULT 0,
     created   TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP
@@ -56,18 +55,10 @@ CREATE TABLE battles
 (
     id      uuid            DEFAULT uuid_generate_v4() PRIMARY KEY,
     timestamp TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    user_id uuid         NOT NULL REFERENCES users (id),
+    winner_id uuid         NOT NULL REFERENCES users (id),
     opponent_id uuid     NOT NULL REFERENCES users (id),
-    winner_id uuid       NOT NULL REFERENCES users (id)
+    log     TEXT            NOT NULL
 );
-
-CREATE TABLE scoreboard 
-(
-    id      uuid DEFAULT uuid_generate_v4() PRIMARY KEY,
-    user_id uuid      NOT NULL REFERENCES users (id),
-    elo     INTEGER      NOT NULL
-);
-
 
 CREATE TABLE trades
 (

@@ -1,6 +1,7 @@
 ﻿using System.Net.Sockets;
 using System.Text;
-using System.Threading.Channels;
+using Microsoft.Extensions.Logging;
+using static Transversal.Utils.Logger;
 
 namespace API.HttpServer
 {
@@ -42,7 +43,7 @@ namespace API.HttpServer
                 if(i == 0)
                 {
                     string[] inc = lines[0].Split(' ');
-                    Method = inc[0].ToUpper(); // TO UPPER NEEDED?
+                    Method = inc[0].ToUpper(); 
                     Path = inc[1];
                     
                 }
@@ -69,8 +70,7 @@ namespace API.HttpServer
 
             Headers = headers.ToArray();
 
-            Console.WriteLine($"Received: {Method} {Path} - Timestamp: {DateTime.Now}");
-
+            LogInfo($"Received: {Method} {Path}");
         }
 
 
@@ -106,7 +106,7 @@ namespace API.HttpServer
         } = string.Empty;
 
 
-        /// <summary>Gets the HTTP hgeaders.</summary>
+        /// <summary>Gets the HTTP headers.</summary>
         public virtual HttpHeader[] Headers
         {
             get; protected set;
@@ -150,7 +150,7 @@ namespace API.HttpServer
             _Client.Close();
             _Client.Dispose();
 
-            Console.WriteLine($"Replying: {status} - Duration: {duration.TotalMilliseconds} ms");
+            LogInfo($"Replying: {status} - {payload} - Duration: {duration.TotalMilliseconds} ms");
         }
         
         public static string GetHttpResponseStatus(int statusCode)

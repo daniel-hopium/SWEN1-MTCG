@@ -24,7 +24,6 @@ namespace DataAccess.Repository
 
                     foreach (var card in cards)
                     {
-                        Console.WriteLine(card.Name);
                         // Assuming Id is a Guid
                         cmd.Parameters.AddWithValue("@id", card.Id);
                         cmd.Parameters.AddWithValue("@name", card.Name);
