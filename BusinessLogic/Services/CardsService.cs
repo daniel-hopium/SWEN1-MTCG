@@ -44,13 +44,13 @@ public class CardsService
     {
         try
         {
-            if (cards.Count != 4  /*|| Comparator.Unique(cards)*/)
+            if (cards.Count != 4  /*|| Comparator.Unique(cards)*/) 
                 throw new ArgumentException("The deck must contain 4 different cards.");
             
             var user = _userRepository.GetUserByUsername(username)!;
             
             if(!_cardsRepository.ValidateDeckForConfiguration(user.Id, CardsMapper.MapToDaoList(cards), DeckSize))
-               throw new ArgumentException("At least one of the provided cards does not belong to the user or is not available.");
+                throw new ArgumentException("At least one of the provided cards does not belong to the user or is not available.");
             _cardsRepository.ResetDeck(user.Id);
             _cardsRepository.ConfigureDeck(user.Id, CardsMapper.MapToDaoList(cards));
         }
@@ -58,7 +58,6 @@ public class CardsService
         {
             Console.WriteLine(e.Message);
             throw;
-
         }
     }
 }

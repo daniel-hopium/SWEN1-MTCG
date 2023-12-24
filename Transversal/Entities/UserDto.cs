@@ -12,7 +12,6 @@
         {
             return $"Username: {Username}, Name: {Name}, Bio: {Bio}, Image: {Image}";
         }
-    
     }    
 }
 

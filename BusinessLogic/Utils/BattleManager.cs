@@ -5,70 +5,70 @@ using static Transversal.Utils.Logger;
 
 namespace BusinessLogic.Utils;
 
-    public enum Effectiveness
-    {
-        Effective,
-        NotEffective,
-        Normal
-    }
+public enum Effectiveness
+{
+    Effective,
+    NotEffective,
+    Normal
+}
 
-    public enum Effects
-    {
-        None,
-        Afraid,
-        Controlled,
-        Drowned,
-        Immune,
-        Evade
-    }
+public enum Effects
+{
+    None,
+    Afraid,
+    Controlled,
+    Drowned,
+    Immune,
+    Evade
+}
 
-    class BattleManager
-    {
-        private readonly List<Battle> _battles = new List<Battle>();
-        private readonly object _lockObject = new object();
+class BattleManager
+{
+    private readonly List<Battle> _battles = new List<Battle>();
+    private readonly object _lockObject = new object();
 
-        public void JoinBattle(UserDao player)
+    public void JoinBattle(UserDao player)
+    {
+        lock (_lockObject)
         {
-            lock (_lockObject)
+            Battle battle = FindAvailableBattle();
+
+            if (battle == null)
             {
-                Battle battle = FindAvailableBattle();
-
-                if (battle == null)
-                {
-                    // If no available battles, create a new one
-                    battle = new Battle();
-                    _battles.Add(battle);
-                    Log($"Battle created.");
-                }
-
-                // Join the battle
-                battle.Join(player);
-
-                // If the battle is full, signal the event to start the battle
-                if (!battle.IsFull)
-                {
-                    Monitor.Wait(_lockObject);
-                }
-                else
-                {
-                    Console.WriteLine(player.Username + " started into battle " );
-                    battle.EnterBattle();
-                }
-                Monitor.PulseAll(_lockObject);
+                // If no available battles, create a new one
+                battle = new Battle();
+                _battles.Add(battle);
+                Log($"Battle created.");
             }
-        }
 
-        private Battle FindAvailableBattle()
-        {
-            return _battles.Find(b => !b.IsFull);
-        }
+            // Join the battle
+            battle.Join(player);
 
-        private static void Log(string message)
-        {
-            Console.WriteLine($"Thread-{Thread.CurrentThread.ManagedThreadId}: {message}");
+            // If the battle is full, signal the event to start the battle
+            if (!battle.IsFull)
+            {
+                Monitor.Wait(_lockObject);
+            }
+            else
+            {
+                Console.WriteLine(player.Username + " started into battle " );
+                battle.EnterBattle();
+            }
+            Monitor.PulseAll(_lockObject);
         }
+    }
 
-        class Battle
+    private Battle FindAvailableBattle()
+    {
+        return _battles.Find(b => !b.IsFull);
+    }
+
+    private static void Log(string message)
+    {
+        Console.WriteLine($"Thread-{Thread.CurrentThread.ManagedThreadId}: {message}");
+    }
+
+    class Battle
     {
         private readonly GameRepository _gameRepository = new GameRepository();
         private readonly UserRepository _userRepository = new UserRepository();

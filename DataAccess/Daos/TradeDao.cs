@@ -6,5 +6,4 @@ public class TradeDao
     public Guid UserCardToTradeId { get; set; }
     public string Type { get; set; }
     public int MinimumDamage { get; set; }
-    
 }

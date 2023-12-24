@@ -34,7 +34,6 @@ public class PackageRepository
         }
         
         AddCardsToPackage(cards, packageId);
-        
     }
 
     public void AddCardsToPackage(List<CardDao> cards, Guid packageId)
@@ -103,51 +102,51 @@ public class PackageRepository
         return null!;
     }
 
-private PackageDao FetchPackage(Guid packageId, NpgsqlConnection connection, NpgsqlTransaction transaction)
-{
-    using (NpgsqlCommand cmd = new NpgsqlCommand("SELECT * FROM packages WHERE id = @packageId", connection, transaction))
+    private PackageDao FetchPackage(Guid packageId, NpgsqlConnection connection, NpgsqlTransaction transaction)
     {
-        cmd.Parameters.AddWithValue("@packageId", packageId);
-
-        using (NpgsqlDataReader reader = cmd.ExecuteReader())
+        using (NpgsqlCommand cmd = new NpgsqlCommand("SELECT * FROM packages WHERE id = @packageId", connection, transaction))
         {
-            if (reader.Read())
+            cmd.Parameters.AddWithValue("@packageId", packageId);
+
+            using (NpgsqlDataReader reader = cmd.ExecuteReader())
             {
-                return MapPackageFromDataReader(reader);
-            }
-        }
-    }
-
-    return null;
-}
-
-private List<CardDao> LoadCardsForPackage(Guid packageId, NpgsqlConnection connection, NpgsqlTransaction transaction)
-{
-    List<CardDao> cards = new List<CardDao>();
-
-    using (NpgsqlCommand cmd = new NpgsqlCommand("SELECT card_id FROM package_cards WHERE package_id = @packageId", connection, transaction))
-    {
-        cmd.Parameters.AddWithValue("@packageId", packageId);
-
-        using (NpgsqlDataReader reader = cmd.ExecuteReader())
-        {
-            while (reader.Read())
-            {
-                Guid cardId = reader.GetGuid(reader.GetOrdinal("card_id"));
-                
-                if (cardId != null)
+                if (reader.Read())
                 {
-                    cards.Add(new CardDao()
-                    {
-                        Id = cardId
-                    });
+                    return MapPackageFromDataReader(reader);
                 }
             }
         }
+
+        return null;
     }
 
-    return cards;
-}
+    private List<CardDao> LoadCardsForPackage(Guid packageId, NpgsqlConnection connection, NpgsqlTransaction transaction)
+    {
+        List<CardDao> cards = new List<CardDao>();
+
+        using (NpgsqlCommand cmd = new NpgsqlCommand("SELECT card_id FROM package_cards WHERE package_id = @packageId", connection, transaction))
+        {
+            cmd.Parameters.AddWithValue("@packageId", packageId);
+
+            using (NpgsqlDataReader reader = cmd.ExecuteReader())
+            {
+                while (reader.Read())
+                {
+                    Guid cardId = reader.GetGuid(reader.GetOrdinal("card_id"));
+                    
+                    if (cardId != null)
+                    {
+                        cards.Add(new CardDao()
+                        {
+                            Id = cardId
+                        });
+                    }
+                }
+            }
+        }
+
+        return cards;
+    }
 
     private PackageDao MapPackageFromDataReader(NpgsqlDataReader reader)
     {
@@ -225,7 +224,7 @@ private List<CardDao> LoadCardsForPackage(Guid packageId, NpgsqlConnection conne
         }
         return null!;
     }
-    
+
     private PackageDao FetchLatestPackage(NpgsqlConnection conn, NpgsqlTransaction transaction)
     {
         string query = "SELECT * FROM packages ORDER BY created DESC LIMIT 1";

@@ -24,7 +24,6 @@ public class TradingService
 
     public void CreateTrade(string username, TradeDto trade)
     {
-
         try
         {
             var user = _userRepository.GetUserByUsername(username)!;
