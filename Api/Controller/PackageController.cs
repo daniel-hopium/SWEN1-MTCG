@@ -50,9 +50,9 @@ public class PackageController
         }
         catch (InvalidOperationException exception)
         {
-            e.Reply(409, "At least one card in the packages already exists");
+            e.Reply(409, exception.Message);
         }
-        catch (Exception exception)
+        catch 
         {
             e.Reply(500, "Error creating package");
         }
@@ -81,7 +81,7 @@ public class PackageController
         {
             e.Reply(403, exception.Message);
         }
-        catch (Exception exception)
+        catch
         {
             e.Reply(500, "Error buying package");
         }

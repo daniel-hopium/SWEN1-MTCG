@@ -52,7 +52,7 @@ public class TradingController
             _tradingService.CarryOutTrade(username, tradeId, cardToTrade);
             e.Reply(200, "Trade successfully carried out");
         }
-        catch (Exception exception)
+        catch
         {
             e.Reply(500, "Error carrying out trade");
         }
@@ -82,7 +82,7 @@ public class TradingController
         {
             e.Reply(403, exception.Message);
         }
-        catch (Exception exception)
+        catch 
         {
             e.Reply(500, "Error deleting trade");
         }
@@ -113,7 +113,7 @@ public class TradingController
         {
             e.Reply(409, exception.Message);
         }
-        catch (Exception exception)
+        catch 
         {
             e.Reply(500, "Error creating trade");
         }

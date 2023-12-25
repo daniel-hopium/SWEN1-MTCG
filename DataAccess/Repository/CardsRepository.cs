@@ -1,4 +1,5 @@
-﻿using Npgsql;
+﻿using System.Threading.Channels;
+using Npgsql;
 using DataAccess.Daos;
 using DataAccess.Utils;
 using static DataAccess.Repository.CardsRepository.Usage;
@@ -36,7 +37,8 @@ public class CardsRepository
                     // Check if the card already exists
                     if (CardExists(conn, transaction, card.Id))
                     {
-                        throw new InvalidOperationException($"Card with ID '{card.Id}' already exists.");
+                        Console.WriteLine($"Card with ID '{card.Id}' already exists.");
+                        throw new InvalidOperationException("At least one card in the packages already exists");
                     }
 
                     using (NpgsqlCommand cmd = new NpgsqlCommand(insertQuery, conn, transaction))
@@ -66,7 +68,7 @@ public class CardsRepository
     }
 }
 
-private bool CardExists(NpgsqlConnection conn, NpgsqlTransaction transaction, Guid cardId)
+    private bool CardExists(NpgsqlConnection conn, NpgsqlTransaction transaction, Guid cardId)
 {
     string checkQuery = "SELECT COUNT(*) FROM cards WHERE id = @id";
     using (NpgsqlCommand cmd = new NpgsqlCommand(checkQuery, conn, transaction))
@@ -76,8 +78,7 @@ private bool CardExists(NpgsqlConnection conn, NpgsqlTransaction transaction, Gu
         return count > 0;
     }
 }
-
-
+    
     public List<CardDao> GetAllCards(Guid userId)
     {
         List<CardDao> cardsList = new List<CardDao>();
@@ -322,93 +323,6 @@ private bool CardExists(NpgsqlConnection conn, NpgsqlTransaction transaction, Gu
         return null;
     }
     
-    public UserCardDao? GetUserCardById(Guid userCardId)
-    {
-        UserCardDao userCard = null;
-        try
-        {
-            using (NpgsqlConnection conn = new NpgsqlConnection(DatabaseManager.ConnectionString))
-            using (NpgsqlCommand cmd = new NpgsqlCommand("SELECT * FROM user_cards WHERE id = @userCardId AND usage = @usage", conn))
-            {
-                conn.Open();
-
-                cmd.Parameters.AddWithValue("@userCardId", userCardId);
-                cmd.Parameters.AddWithValue("@usage", None.ToString().ToLower());
-
-                using (NpgsqlDataReader reader = cmd.ExecuteReader())
-                {
-                    if (reader.Read())
-                    {
-                        return MapUserCardFromDataReader(reader);
-                    }
-                }
-
-                conn.Close();
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Error fetching card by ID {userCardId}: {ex.Message}");
-        }
-
-        return null;
-    }
-    
-    private UserCardDao MapUserCardFromDataReader(NpgsqlDataReader reader)
-    {
-        return new UserCardDao()
-        {
-            Id = Guid.Parse(reader["id"].ToString()),
-            UserId = Guid.Parse(reader["user_id"].ToString()),
-            CardId = Guid.Parse(reader["card_id"].ToString()),
-            Usage = (CardUsage)Enum.Parse(typeof(Usage), reader["usage"].ToString(), true)
-        };
-    }
-
-    public void DeleteUserCard(Guid userCardId)
-    {
-        try
-        {
-            using (NpgsqlConnection conn = new NpgsqlConnection(DatabaseManager.ConnectionString))
-            using (NpgsqlCommand cmd = new NpgsqlCommand("DELETE FROM user_cards WHERE id = @userCardId", conn))
-            {
-                conn.Open();
-
-                cmd.Parameters.AddWithValue("@userCardId", userCardId);
-                cmd.ExecuteNonQuery();
-
-                conn.Close();
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Error deleting user card {userCardId}: {ex.Message}");
-        }
-    }
-
-    public void UpdateUsage(Guid userId, Guid userCardCardId, Usage trade)
-    {
-        try
-        {
-            using (NpgsqlConnection conn = new NpgsqlConnection(DatabaseManager.ConnectionString))
-            using (NpgsqlCommand cmd = new NpgsqlCommand("UPDATE user_cards SET usage = @usage WHERE user_id = @userId AND card_id = @cardId", conn))
-            {
-                conn.Open();
-
-                cmd.Parameters.AddWithValue("@userId", userId);
-                cmd.Parameters.AddWithValue("@cardId", userCardCardId);
-                cmd.Parameters.AddWithValue("@usage", trade.ToString().ToLower());
-                cmd.ExecuteNonQuery();
-
-                conn.Close();
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Error updating usage for user {userId} and card {userCardCardId}: {ex.Message}");
-        }
-    }
-
     public UserCardDao GetUserCardByCardId(Guid cardId)
     {
         {
@@ -439,4 +353,39 @@ private bool CardExists(NpgsqlConnection conn, NpgsqlTransaction transaction, Gu
         }
         return null;
     }
+    
+    private UserCardDao MapUserCardFromDataReader(NpgsqlDataReader reader)
+    {
+        return new UserCardDao()
+        {
+            Id = Guid.Parse(reader["id"].ToString()),
+            UserId = Guid.Parse(reader["user_id"].ToString()),
+            CardId = Guid.Parse(reader["card_id"].ToString()),
+            Usage = (CardUsage)Enum.Parse(typeof(Usage), reader["usage"].ToString(), true)
+        };
+    }
+    
+    public void UpdateUsage(Guid userId, Guid userCardCardId, Usage trade)
+    {
+        try
+        {
+            using (NpgsqlConnection conn = new NpgsqlConnection(DatabaseManager.ConnectionString))
+            using (NpgsqlCommand cmd = new NpgsqlCommand("UPDATE user_cards SET usage = @usage WHERE user_id = @userId AND card_id = @cardId", conn))
+            {
+                conn.Open();
+
+                cmd.Parameters.AddWithValue("@userId", userId);
+                cmd.Parameters.AddWithValue("@cardId", userCardCardId);
+                cmd.Parameters.AddWithValue("@usage", trade.ToString().ToLower());
+                cmd.ExecuteNonQuery();
+
+                conn.Close();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error updating usage for user {userId} and card {userCardCardId}: {ex.Message}");
+        }
+    }
+    
 }

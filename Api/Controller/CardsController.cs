@@ -4,7 +4,6 @@ using BusinessLogic.Exceptions;
 using BusinessLogic.Services;
 using Newtonsoft.Json;
 using Transversal.Entities;
-using static System.Web.HttpUtility;
 
 namespace API.Controller;
 public class CardsController
@@ -52,7 +51,7 @@ public class CardsController
             }
             e.Reply(200, JsonConvert.SerializeObject(cards));
         }
-        catch (Exception exception)
+        catch 
         {
             e.Reply(500, "Error getting cards");
         }
@@ -112,7 +111,7 @@ public class CardsController
         {
             e.Reply(403, exception.Message);
         }
-        catch (Exception exception)
+        catch 
         {
             e.Reply(500, "Error configuring deck");
         }

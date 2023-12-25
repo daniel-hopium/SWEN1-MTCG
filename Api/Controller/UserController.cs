@@ -65,7 +65,7 @@ public class UserController
         {
             e.Reply(404, exception.Message);
         }
-        catch (Exception exception)
+        catch 
         {
             e.Reply(500, "Error updating user");
         }

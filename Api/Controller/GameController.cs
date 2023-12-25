@@ -65,7 +65,7 @@ public class GameController
             var battleStats = _gameService.StartBattle(username);
             e.Reply(200, JsonConvert.SerializeObject(battleStats));
         }
-        catch (Exception exception)
+        catch 
         {
             e.Reply(500, "Internal Server Error");
         }
