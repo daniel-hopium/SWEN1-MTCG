@@ -54,11 +54,19 @@ public class UserController
             return;
         }
         
+        var usernameFromAuthorization = Authorization.GetUsernameFromAuthorization(e.Authorization);
+        string usernamePathVariable = e.PathVariable();
+        
+        if(usernameFromAuthorization != usernamePathVariable)
+        {
+            e.Reply(403, "Forbidden");
+            return;
+        }
+        
         UserDto userDto = JsonConvert.DeserializeObject<UserDto>(e.Payload)!;
-        string username = e.PathVariable();
         try
         {
-            var updatedUser = _userService.UpdateUser(username, userDto);
+            var updatedUser = _userService.UpdateUser(usernamePathVariable, userDto);
             e.Reply(200, JsonConvert.SerializeObject(updatedUser));
         }
         catch (InvalidCredentialException exception)
@@ -79,6 +87,15 @@ public class UserController
             return; 
         }
         
+        var usernameFromAuthorization = Authorization.GetUsernameFromAuthorization(e.Authorization);
+        string usernamePathVariable = e.PathVariable();
+        
+        if(usernameFromAuthorization != usernamePathVariable)
+        {
+            e.Reply(403, "Forbidden");
+            return;
+        }
+        
         var updatedUser = _userService.GetUser(e.PathVariable());
         e.Reply(200, JsonConvert.SerializeObject(updatedUser));
     }
@@ -86,6 +103,7 @@ public class UserController
     private void CreateUser(HttpSvrEventArgs e)
     {
         var user = JsonConvert.DeserializeObject<UserDto>(e.Payload);
+        
         
         if (user == null) 
         {

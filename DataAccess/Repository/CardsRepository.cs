@@ -1,5 +1,4 @@
-﻿using System.Threading.Channels;
-using Npgsql;
+﻿using Npgsql;
 using DataAccess.Daos;
 using DataAccess.Utils;
 using static DataAccess.Repository.CardsRepository.Usage;
@@ -245,14 +244,12 @@ public class CardsRepository
 
                 foreach (var card in cards)
                 {
-                    using (NpgsqlCommand cmd = new NpgsqlCommand("UPDATE user_cards SET usage = @usage WHERE user_id = @userId AND card_id = @cardId", conn))
-                    {
-                        cmd.Parameters.Clear();
-                        cmd.Parameters.AddWithValue("@userId", userId);
-                        cmd.Parameters.AddWithValue("@cardId", card.Id); 
-                        cmd.Parameters.AddWithValue("@usage", Deck.ToString().ToLower());
-                        cmd.ExecuteNonQuery();
-                    }
+                    using NpgsqlCommand cmd = new NpgsqlCommand("UPDATE user_cards SET usage = @usage WHERE user_id = @userId AND card_id = @cardId", conn);
+                    cmd.Parameters.Clear();
+                    cmd.Parameters.AddWithValue("@userId", userId);
+                    cmd.Parameters.AddWithValue("@cardId", card.Id); 
+                    cmd.Parameters.AddWithValue("@usage", Deck.ToString().ToLower());
+                    cmd.ExecuteNonQuery();
                 }
             }
         }

@@ -102,6 +102,7 @@ public class TradingService
         catch (Exception e)
         {
             Console.WriteLine(e);
+            throw;
         }
     }
 }

@@ -3,6 +3,8 @@ using System.Net.Sockets;
 using System.Text;
 using System.Web;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using static Transversal.Utils.Logger;
 
 namespace API.HttpServer
@@ -150,7 +152,14 @@ namespace API.HttpServer
             {
                 data += "Content-Length: 0\n";
             }
-            data += "Content-Type: text/plain\n\n";
+            else if (IsJson(payload))
+            {
+                data += "Content-Type: application/json\n\n";
+            }
+            else
+            {
+                data += "Content-Type: text/plain\n\n";
+            }
 
             if(!string.IsNullOrEmpty(payload)) { data += payload; }
 
@@ -161,7 +170,20 @@ namespace API.HttpServer
 
             LogInfo($"Replying: {status} - {payload} - Duration: {duration.TotalMilliseconds} ms");
         }
-        
+
+        private bool IsJson(string payload)
+        {
+            try
+            {
+                JToken.Parse(payload);
+                return true;
+            }
+            catch (JsonReaderException)
+            {
+                return false;
+            }
+        }
+
         public static string GetHttpResponseStatus(int statusCode)
         {
             string statusLine = statusCode switch

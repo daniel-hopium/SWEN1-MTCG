@@ -102,13 +102,13 @@ public class GameRepository
                 {
                     cmd.Parameters.AddWithValue("@wins", player.Wins + 1);
                     cmd.Parameters.AddWithValue("@losses", player.Losses);
-                    cmd.Parameters.AddWithValue("@elo", player.Elo + 10);
+                    cmd.Parameters.AddWithValue("@elo", player.Elo + 3);
                 }
                 else
                 {
                     cmd.Parameters.AddWithValue("@wins", player.Wins );
                     cmd.Parameters.AddWithValue("@losses", player.Losses + 1);
-                    cmd.Parameters.AddWithValue("@elo", player.Elo - 10);
+                    cmd.Parameters.AddWithValue("@elo", player.Elo - 5);
                 }
                 cmd.ExecuteNonQuery();
             
@@ -150,7 +150,7 @@ public class GameRepository
 
     public BattleDao FindLastBattle()
     {
-        string selectQuery = "SELECT * FROM battles ORDER BY id DESC LIMIT 1";
+        string selectQuery = "SELECT * FROM battles ORDER BY timestamp DESC LIMIT 1";
 
         using (NpgsqlConnection conn = new NpgsqlConnection(DatabaseManager.ConnectionString))
         using (NpgsqlCommand cmd = new NpgsqlCommand(selectQuery, conn))

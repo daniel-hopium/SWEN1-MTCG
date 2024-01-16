@@ -72,6 +72,7 @@ public class UserRepository
         {
             Id = Guid.Parse(reader["id"].ToString()),
             Bio = reader["bio"].ToString(),
+            Name = reader["name"].ToString(),
             Username = reader["username"].ToString(),
             Password = reader["password"].ToString(),
             Image = reader["image"].ToString(),
@@ -82,11 +83,12 @@ public class UserRepository
     public UserDao UpdateUser(UserDao userDao)
     {
         using (NpgsqlConnection conn = new NpgsqlConnection(DatabaseManager.ConnectionString))
-        using (NpgsqlCommand cmd = new NpgsqlCommand("UPDATE users SET username = @username, bio = @bio, image = @image WHERE id = @id ", conn))
+        using (NpgsqlCommand cmd = new NpgsqlCommand("UPDATE users SET username = @username, name = @name, bio = @bio, image = @image WHERE id = @id RETURNING id, username, name, bio, image, password, coins", conn))
         {
             conn.Open();
             
             cmd.Parameters.AddWithValue("@username", userDao.Username);
+            cmd.Parameters.AddWithValue("@name", userDao.Name);
             cmd.Parameters.AddWithValue("@bio", userDao.Bio);
             cmd.Parameters.AddWithValue("@image", userDao.Image);
             cmd.Parameters.AddWithValue("@id", userDao.Id);

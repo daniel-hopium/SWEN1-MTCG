@@ -24,7 +24,7 @@ namespace BusinessLogic.Services
                 var oldUser = _userRepository.GetUserByUsername(oldUsername)!;
                 if(oldUser == null)
                     throw new InvalidCredentialException("User not found");
-                oldUser.Username = userDto.Name; // Name to username...
+                oldUser.Name = userDto.Name; 
                 oldUser.Bio = userDto.Bio;
                 oldUser.Image = userDto.Image;
                 

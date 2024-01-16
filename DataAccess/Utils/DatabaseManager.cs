@@ -1,4 +1,6 @@
-﻿using Npgsql;
+﻿using Microsoft.Extensions.Logging;
+using Npgsql;
+using Transversal.Utils;
 
 namespace DataAccess.Utils;
 public class DatabaseManager
@@ -39,7 +41,7 @@ public class DatabaseManager
         {
             _dbConnection = new NpgsqlConnection(ConnectionString);
             _dbConnection.Open();
-            string filePath = "../../../../DataAccess/Initializer/sql/init.sql";
+            string filePath = "../../../../DataAccess/Db/sql/init.sql";
             var sql = System.IO.File.ReadAllText(filePath);
             var cmd = new NpgsqlCommand(sql, _dbConnection);
             cmd.ExecuteNonQuery();
@@ -49,8 +51,7 @@ public class DatabaseManager
         {
             Console.WriteLine(e);
         }
-
-        Console.WriteLine("Database setup complete");
+        Logger.LogInfo("Database setup complete");
     }
     
     //  Check if database is already setup
