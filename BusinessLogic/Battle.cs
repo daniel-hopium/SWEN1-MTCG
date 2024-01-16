@@ -1,7 +1,7 @@
 ﻿using DataAccess.Daos;
 using DataAccess.Repository;
+using Transversal.Utils;
 using static BusinessLogic.Effectiveness;
-using static Transversal.Utils.Log;
 
 namespace BusinessLogic;
 
@@ -40,15 +40,15 @@ class Battle
         lock (_lockObject)
         {
             _players.Add(player);
-            InfoWithThread($"{player.Username} joined Battle.");
+            Log.InfoWithThread($"{player.Username} joined Battle.");
         }
     }
 
     public void Run()
     {
         
-        Console.WriteLine("Battle is starting....");
-        Console.WriteLine($"PlayerA: {_players[0].Username} vs PlayerB: {_players[1].Username}");
+        Log.Info("A Battle is starting....");
+        Log.Info($"PlayerA: {_players[0].Username} vs PlayerB: {_players[1].Username}");
     
         try
         {
@@ -66,11 +66,11 @@ class Battle
         }
         catch (Exception e)
         {
-            Console.WriteLine(e);
+            Log.Error($"An error occurred while running a battle", e);
             ResetBattle();
         }
         
-        Console.WriteLine("Battle completed.");
+        Log.Info("Battle completed.");
     }
     
     private void SimulateBattleRound()
@@ -111,7 +111,7 @@ class Battle
                 log += "Draw";
             }
             
-            Info(log);
+            Log.Info(log);
             _battleLog.Add(log);
     }
 
@@ -201,7 +201,7 @@ class Battle
     private void LogResult()
     {
         string log = $"PlayerA: {_players[0].Username} wins {_playerWins[0]} rounds. PlayerB: {_players[1].Username} wins {_playerWins[1]} rounds. Draws: {_battleCount - _playerWins[0] - _playerWins[1]}";
-        Info(log);
+        Log.Info(log);
         _battleLog.Add(log);
     }
 

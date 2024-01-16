@@ -1,4 +1,5 @@
 ﻿using DataAccess.Daos;
+using Transversal.Utils;
 using static Transversal.Utils.Log;
 
 namespace BusinessLogic;
@@ -32,7 +33,7 @@ class BattleManager
             }
             else
             {
-                Console.WriteLine(player.Username + " started into battle " );
+                Log.Info(player.Username + " started a battle " );
                 battle.Run();
             }
             Monitor.PulseAll(_lockObject);

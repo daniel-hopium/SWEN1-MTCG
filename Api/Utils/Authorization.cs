@@ -1,4 +1,5 @@
-﻿using BusinessLogic.Services;
+﻿using API.HttpServer;
+using BusinessLogic.Services;
 using Transversal.Entities;
 
 namespace Api.Utils;
@@ -50,5 +51,13 @@ public static class Authorization
         
         var tokenParts = Token.Split('-');
         return tokenParts[0];
+    }
+    
+    public static bool UserIsAuthorized (HttpSvrEventArgs e)
+    {
+        if (AuthorizeUser(e.Authorization)) return true;
+        
+        e.Reply(401, "Unauthorized");
+        return false;
     }
 }

@@ -17,6 +17,9 @@ public class PackageController
     
     public void ProcessRequest(object sender, HttpSvrEventArgs e)
     {
+        //Authorization
+        if (!Authorization.UserIsAuthorized(e))
+            return;
 
         if (e.Path.Equals("/packages") && e.Method.Equals("POST"))
         {
@@ -30,11 +33,6 @@ public class PackageController
 
     private void CreatePackages(HttpSvrEventArgs e)
     {
-        if (!Authorization.AuthorizeUser(e.Authorization))
-        {
-            e.Reply(401, "Unauthorized");
-            return;
-        }
         
         if (!Authorization.AuthorizeAdmin(e.Authorization))
         {
@@ -60,11 +58,6 @@ public class PackageController
     
     private void BuyPackage(HttpSvrEventArgs e)
     {
-        if (!Authorization.AuthorizeUser(e.Authorization))
-        {
-            e.Reply(401, "Unauthorized");
-            return;
-        }
 
         var package = JsonConvert.DeserializeObject<PackageDto>(e.Payload);
         var username = Authorization.GetUsernameFromAuthorization(e.Authorization);

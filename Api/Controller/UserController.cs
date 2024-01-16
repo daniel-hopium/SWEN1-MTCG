@@ -48,11 +48,9 @@ public class UserController
 
     private void UpdateUserData(HttpSvrEventArgs e)
     {
-        if (!Authorization.AuthorizeUser(e.Authorization))
-        {
-            e.Reply(401, "Unauthorized");
+        //Authorization
+        if (!Authorization.UserIsAuthorized(e))
             return;
-        }
         
         var usernameFromAuthorization = Authorization.GetUsernameFromAuthorization(e.Authorization);
         string usernamePathVariable = e.PathVariable();
@@ -81,6 +79,10 @@ public class UserController
 
     private void GetUserData(HttpSvrEventArgs e)
     {
+        //Authorization
+        if (!Authorization.UserIsAuthorized(e))
+            return;
+        
         if (!_userService.UserExists(e.PathVariable()))
         { 
             e.Reply(404, "User not found");
@@ -103,7 +105,6 @@ public class UserController
     private void CreateUser(HttpSvrEventArgs e)
     {
         var user = JsonConvert.DeserializeObject<UserDto>(e.Payload);
-        
         
         if (user == null) 
         {

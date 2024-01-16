@@ -4,6 +4,7 @@ using BusinessLogic.Mapper;
 using DataAccess.Daos;
 using DataAccess.Repository;
 using Transversal.Entities;
+using Transversal.Utils;
 
 namespace BusinessLogic.Services;
 
@@ -25,7 +26,7 @@ public class PackageService
         }
         catch (Exception e)
         {
-            Console.WriteLine(e);
+            Log.Error($"An error occured while creating a package with ID {packageId}", e);
             throw;
         }
     }
@@ -34,7 +35,6 @@ public class PackageService
     public void BuyPackage(PackageDto? dtoPackage, string username)
     {
         var user = _userRepository.GetUserByUsername(username)!;
-        Console.WriteLine("User coins: " + user.Coins);
         try
         {
             PackageDao daoPackage;
@@ -53,7 +53,7 @@ public class PackageService
         }
         catch (Exception e)
         {
-            Console.WriteLine(e);
+            Log.Error("An error occured while buying a package", e);
             throw;
         }
     }

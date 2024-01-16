@@ -21,7 +21,7 @@ public class TradingService
         }
         catch (Exception e)
         {
-            Console.WriteLine(e.Message);
+            Log.Error("An error occured while getting all trades", e);
         }
         return new List<TradeDto>();
     }
@@ -71,7 +71,7 @@ public class TradingService
         }
         catch (Exception e)
         {
-            Console.WriteLine(e);
+            Log.Error($"An error occured while deleting trade {tradeId}", e);
             throw;
         }
     }
@@ -103,7 +103,7 @@ public class TradingService
         }
         catch (Exception e)
         {
-            Console.WriteLine(e);
+            Log.Error($"An error occured while carrying out trade {tradeId} ", e);
             throw;
         }
     }

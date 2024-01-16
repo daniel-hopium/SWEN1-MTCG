@@ -1,7 +1,8 @@
 ﻿using DataAccess.Daos;
 using DataAccess.Utils;
 using Npgsql;
-    
+using Transversal.Utils;
+
 namespace DataAccess.Repository;
 public class UserRepository
 {
@@ -135,7 +136,6 @@ public class UserRepository
             
             cmd.Parameters.AddWithValue("@username", user.Username);
             cmd.Parameters.AddWithValue("@coins", user.Coins - packagePrice);
-            Console.WriteLine(packagePrice);
             cmd.ExecuteNonQuery();
             
             conn.Close();
@@ -193,7 +193,7 @@ public class UserRepository
         }
         catch (Exception e)
         {
-            Console.WriteLine(e);
+            Log.Error($"An error occured while getting scoreboard", e);
             return null;
         }
     }
@@ -225,9 +225,9 @@ public class UserRepository
                 conn.Close();
             }
         }
-        catch (Exception ex)
+        catch (Exception e)
         {
-            Console.WriteLine($"Error fetching user by username {username}: {ex.Message}");
+            Log.Error($"An error occured while fetching user by username {username}", e);
         }
         return null; 
     }
@@ -249,9 +249,9 @@ public class UserRepository
 
                 conn.Close();
             }
-            catch (Exception ex)
+            catch (Exception e)
             {
-                Console.WriteLine($"Error creating user: {ex.Message}");
+                Log.Error($"An error occured while creating an user", e);
             }
         }
     }

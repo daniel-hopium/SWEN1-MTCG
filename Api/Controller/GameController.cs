@@ -15,6 +15,10 @@ public class GameController
     
     public void ProcessRequest(object sender, HttpSvrEventArgs e)
     {
+        //Authorization
+        if (!Authorization.UserIsAuthorized(e))
+            return;
+        
         if (e.Path.Equals("/stats") && e.Method.Equals("GET"))
         {
             GetStats(e);
@@ -31,11 +35,6 @@ public class GameController
 
     private void GetStats(HttpSvrEventArgs e)
     {
-        if (!Authorization.AuthorizeUser(e.Authorization))
-        {
-            e.Reply(401, "Unauthorized");
-            return;
-        }
         var username = Authorization.GetUsernameFromAuthorization(e.Authorization);
         var user = _gameService.GetUserStats(username);
         e.Reply(200, JsonConvert.SerializeObject(user));
@@ -43,22 +42,12 @@ public class GameController
     
     private void GetScoreboard(HttpSvrEventArgs e)
     {
-        if (!Authorization.AuthorizeUser(e.Authorization))
-        {
-            e.Reply(401, "Unauthorized");
-            return;
-        }
         var scoreboard = _gameService.GetScoreboard();
         e.Reply(200, JsonConvert.SerializeObject(scoreboard));
     }
     
     private void StartBattle(HttpSvrEventArgs e)
     {
-        if (!Authorization.AuthorizeUser(e.Authorization))
-        {
-            e.Reply(401, "Unauthorized");
-            return;
-        }
         var username = Authorization.GetUsernameFromAuthorization(e.Authorization);
         try
         {

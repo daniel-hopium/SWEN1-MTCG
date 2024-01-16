@@ -49,7 +49,7 @@ public class DatabaseManager
         }
         catch (Exception e)
         {
-            Console.WriteLine(e);
+            Log.Error($"An error occured while setting up database", e);
         }
         Log.Info("Database setup complete");
     }
@@ -81,7 +81,7 @@ public class DatabaseManager
         }
         catch (Exception e)
         {
-            Console.WriteLine(e);
+            Log.Error($"An error occured while checking if database tables are setup", e);
             return false;
         }
     }

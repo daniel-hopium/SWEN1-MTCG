@@ -3,6 +3,7 @@ using BusinessLogic.Mapper;
 using BusinessLogic.Utils;
 using DataAccess.Repository;
 using Transversal.Entities;
+using Transversal.Utils;
 
 namespace BusinessLogic.Services;
 
@@ -21,7 +22,7 @@ public class CardsService
         }
         catch (Exception e)
         {
-            Console.WriteLine(e);
+            Log.Error($"An error occured while getting all cards of {username}", e);
             throw;
             
         }
@@ -36,7 +37,7 @@ public class CardsService
         }
         catch (Exception e)
         {
-            Console.WriteLine(e.Message);
+            Log.Error("An error occured while getting a deck", e);
             
         }
         return new List<CardDto>();
@@ -58,7 +59,7 @@ public class CardsService
         }
         catch (Exception e)
         {
-            Console.WriteLine(e.Message);
+            Log.Error($"An error occured while configuring the deck of {username}", e);
             throw;
         }
     }

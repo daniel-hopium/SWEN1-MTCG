@@ -17,6 +17,10 @@ public class TradingController
     
     public void ProcessRequest(object sender, HttpSvrEventArgs e)
     {
+        //Authorization
+        if (!Authorization.UserIsAuthorized(e))
+            return;
+        
         if (e.Path.Equals("/tradings") && e.Method.Equals("GET"))
         {
             GetTrades(e);
@@ -37,11 +41,6 @@ public class TradingController
 
     private void CarryOutTrade(HttpSvrEventArgs e)
     {
-        if (!Authorization.AuthorizeUser(e.Authorization))
-        {
-            e.Reply(401, "Unauthorized");
-            return;
-        }
         var username = Authorization.GetUsernameFromAuthorization(e.Authorization);
         var tradeId = Guid.Parse(e.PathVariable());
         var cardToTrade = JsonConvert.DeserializeObject<Guid>(e.Payload);
@@ -60,14 +59,8 @@ public class TradingController
 
     private void DeleteTrade(HttpSvrEventArgs e)
     {
-        if (!Authorization.AuthorizeUser(e.Authorization))
-        {
-            e.Reply(401, "Unauthorized");
-            return;
-        }
         var username = Authorization.GetUsernameFromAuthorization(e.Authorization);
         var tradeId = Guid.Parse(e.PathVariable());
-        Console.WriteLine(tradeId.ToString());
 
         try
         {
@@ -91,11 +84,6 @@ public class TradingController
 
     private void CreateTrade(HttpSvrEventArgs e)
     {
-        if (!Authorization.AuthorizeUser(e.Authorization))
-        {
-            e.Reply(401, "Unauthorized");
-            return;
-        }
         var username = Authorization.GetUsernameFromAuthorization(e.Authorization);
         var trade = JsonConvert.DeserializeObject<TradeDto>(e.Payload);
         Console.WriteLine(trade!.ToString());
@@ -121,11 +109,6 @@ public class TradingController
 
     private void GetTrades(HttpSvrEventArgs e)
     {
-        if (!Authorization.AuthorizeUser(e.Authorization))
-        {
-            e.Reply(401, "Unauthorized");
-            return;
-        }
         var username = Authorization.GetUsernameFromAuthorization(e.Authorization);
         
         var tradings = _tradingService.GetTrades(username);

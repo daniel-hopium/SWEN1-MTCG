@@ -1,6 +1,7 @@
 ﻿using DataAccess.Daos;
 using DataAccess.Utils;
 using Npgsql;
+using Transversal.Utils;
 using static DataAccess.Repository.CardsRepository.Usage;
 
 namespace DataAccess.Repository;
@@ -29,9 +30,9 @@ public class TradeRepository
                 conn.Close();
             }
         }
-        catch (Exception ex)
+        catch (Exception e)
         {
-            Console.WriteLine($"Error getting tradings: {ex.Message}");
+            Log.Error($"An error occured while getting trades", e);
         }
         return tradingsList;
     }
@@ -66,9 +67,9 @@ public class TradeRepository
                 conn.Close();
             }
         }
-        catch (Exception ex)
+        catch (Exception e)
         {
-            Console.WriteLine($"Error getting tradings: {ex.Message}");
+            Log.Error($"An error occured while checking if a trade exists", e);
         }
         return false;
     }
@@ -89,9 +90,9 @@ public class TradeRepository
                 conn.Close();
             }
         }
-        catch (Exception ex)
+        catch (Exception e)
         {
-            Console.WriteLine($"Error creating trade: {ex.Message}");
+            Log.Error($"An error occured while creating a trade", e);
         }
     }
 
@@ -108,9 +109,9 @@ public class TradeRepository
                 conn.Close();
             }
         }
-        catch (Exception ex)
+        catch (Exception e)
         {
-            Console.WriteLine($"Error deleting trade: {ex.Message}");
+            Log.Error($"An error occured while deleting trade {tradeId}", e);
         }
     }
 
@@ -134,9 +135,9 @@ public class TradeRepository
                 conn.Close();
             }
         }
-        catch (Exception ex)
+        catch (Exception e)
         {
-            Console.WriteLine($"Error getting tradings: {ex.Message}");
+            Log.Error($"An error occured while getting trades", e);
         }
         return null;
     }
@@ -160,9 +161,9 @@ public class TradeRepository
 
                 conn.Close();
             }
-            catch (Exception ex)
+            catch (Exception e)
             {
-                Console.WriteLine($"Error updating card: {ex.Message}");
+                Log.Error($"An error occured while updating a card", e);
             }
         }
     }

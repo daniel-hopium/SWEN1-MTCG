@@ -1,6 +1,7 @@
 ﻿using DataAccess.Daos;
 using DataAccess.Utils;
 using Npgsql;
+using Transversal.Utils;
 
 namespace DataAccess.Repository;
 
@@ -37,9 +38,9 @@ public class GameRepository
 
                 conn.Close();
             }
-            catch (Exception ex)
+            catch (Exception e)
             {
-                Console.WriteLine($"Error adding cards: {ex.Message}");
+                Log.Error($"An error occured while adding cards", e);
             }
         }
 
@@ -79,9 +80,9 @@ public class GameRepository
 
                 return scoreboard;
             }
-            catch (Exception ex)
+            catch (Exception e)
             {
-                Console.WriteLine($"Error adding cards: {ex.Message}");
+                Log.Error($"An error occured while adding cards", e);
             }
         }
 
@@ -117,7 +118,7 @@ public class GameRepository
         }
         catch (Exception e)
         {
-            Console.WriteLine(e);
+            Log.Error($"An error occurred while updating stats for {player.Id}", e);;
             throw;
         }
     }
@@ -141,9 +142,9 @@ public class GameRepository
 
                 conn.Close();
             }
-            catch (Exception ex)
+            catch (Exception e)
             {
-                Console.WriteLine($"Error adding cards: {ex.Message}");
+                Log.Error($"An error occured while adding cards", e);
             }
         }
     }
@@ -174,9 +175,9 @@ public class GameRepository
 
                 conn.Close();
             }
-            catch (Exception ex)
+            catch (Exception e)
             {
-                Console.WriteLine($"Error adding cards: {ex.Message}");
+                Log.Error($"An error occured while adding cards", e);
             }
         }
 

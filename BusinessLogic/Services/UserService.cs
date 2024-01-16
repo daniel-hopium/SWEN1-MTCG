@@ -3,6 +3,7 @@ using BusinessLogic.Mapper;
 using BusinessLogic.Utils;
 using DataAccess.Repository;
 using Transversal.Entities;
+using Transversal.Utils;
 
 namespace BusinessLogic.Services
 {
@@ -32,12 +33,12 @@ namespace BusinessLogic.Services
             }
             catch (InvalidCredentialException e)
             {
-                Console.WriteLine(e);
+                Log.Error($"An error occurred while updating {oldUsername}", e);
                 throw;
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
+                Log.Error($"An error occurred while updating {oldUsername}", e);
                 throw new Exception("Error updating user");
             }
         }

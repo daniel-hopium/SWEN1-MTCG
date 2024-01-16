@@ -3,6 +3,7 @@ using BusinessLogic.Utils;
 using DataAccess.Daos;
 using DataAccess.Repository;
 using Transversal.Entities;
+using Transversal.Utils;
 using static BusinessLogic.Services.CardsService;
 
 namespace BusinessLogic.Services;
@@ -30,7 +31,7 @@ public class GameService
         }
         catch (Exception e)
         {
-            Console.WriteLine(e);
+            Log.Error("An error occured while starting a battle", e);
             throw;
         }
     }

@@ -1,6 +1,7 @@
 ﻿using DataAccess.Daos;
 using DataAccess.Utils;
 using Npgsql;
+using Transversal.Utils;
 
 namespace DataAccess.Repository;
 
@@ -27,9 +28,9 @@ public class PackageRepository
                     
                 conn.Close();
             }
-            catch (Exception ex)
+            catch (Exception e)
             {
-                Console.WriteLine($"Error adding cards: {ex.Message}");
+                Log.Error($"An error occured while adding cards", e);
             }
         }
         
@@ -60,9 +61,9 @@ public class PackageRepository
 
                 conn.Close();
             }
-            catch (Exception ex)
+            catch (Exception e)
             {
-                Console.WriteLine($"Error adding cards: {ex.Message}");
+                Log.Error($"An error occurred while adding cards", e);
             }
         }
     }
@@ -87,17 +88,17 @@ public class PackageRepository
                         transaction.Commit();
                         return package;
                     }
-                    catch (Exception ex)
+                    catch (Exception e)
                     {
-                        Console.WriteLine($"Error in transaction: {ex.Message}");
+                        Log.Error($"An error occured in a transaction to find a package", e);
                         transaction.Rollback();
                     }
                 }
             }
         }
-        catch (Exception ex)
+        catch (Exception e)
         {
-            Console.WriteLine($"Error fetching package by id: {ex.Message}");
+            Log.Error($"An error occured while fetching package by id: {packageId}", e);
         }
         return null!;
     }
@@ -179,9 +180,9 @@ public class PackageRepository
 
                         cmd.ExecuteNonQuery();
                     }
-                    catch (Exception ex)
+                    catch (Exception e)
                     {
-                        Console.WriteLine($"Error adding card {card.Id} to user {user.Id}: {ex.Message}");
+                        Log.Error($"An error occured while adding card {card.Id} to user {user.Id}", e);
                     }
                 }
             }
@@ -210,17 +211,17 @@ public class PackageRepository
                         transaction.Commit();
                         return package;
                     }
-                    catch (Exception ex)
+                    catch (Exception e)
                     {
-                        Console.WriteLine($"Error in transaction: {ex.Message}");
+                        Log.Error($"An error occured in transaction while fetching package", e);
                         transaction.Rollback();
                     }
                 }
             }
         }
-        catch (Exception ex)
+        catch (Exception e)
         {
-            Console.WriteLine($"Error fetching package by id: {ex.Message}");
+            Log.Error($"An error occured while fetching package", e);
         }
         return null!;
     }
@@ -258,9 +259,9 @@ public class PackageRepository
 
                     cmd.ExecuteNonQuery();
                 }
-                catch (Exception ex)
+                catch (Exception e)
                 {
-                    Console.WriteLine($"Error deleting package {daoPackage.Id}: {ex.Message}");
+                    Log.Error($"An error occured while deleting package {daoPackage.Id}", e);
                 }
             }
 

@@ -1,6 +1,8 @@
-﻿using Npgsql;
+﻿using System.Runtime.InteropServices.JavaScript;
+using Npgsql;
 using DataAccess.Daos;
 using DataAccess.Utils;
+using Transversal.Utils;
 using static DataAccess.Repository.CardsRepository.Usage;
 
 namespace DataAccess.Repository;
@@ -36,7 +38,7 @@ public class CardsRepository
                     // Check if the card already exists
                     if (CardExists(conn, transaction, card.Id))
                     {
-                        Console.WriteLine($"Card with ID '{card.Id}' already exists.");
+                        Log.Info($"Card with ID '{card.Id}' already exists.");
                         throw new InvalidOperationException("At least one card in the packages already exists");
                     }
 
@@ -54,10 +56,10 @@ public class CardsRepository
 
                 transaction.Commit();
             }
-            catch (Exception ex)
+            catch (Exception e)
             {
                 transaction.Rollback();
-                Console.WriteLine($"Error adding cards: {ex.Message}");
+                Log.Error($"An error occurred while creating cards" , e);
             }
             finally
             {
@@ -107,9 +109,9 @@ public class CardsRepository
                 conn.Close();
             }
         }
-        catch (Exception ex)
+        catch (Exception e)
         {
-            Console.WriteLine($"Error fetching cards for userId {userId}: {ex.Message}");
+            Log.Error($"Error fetching cards for userId {userId}", e);
         }
 
         return cardsList;
@@ -138,9 +140,9 @@ public class CardsRepository
                 conn.Close();
             }
         }
-        catch (Exception ex)
+        catch (Exception e)
         {
-            Console.WriteLine($"Error fetching card by ID {cardId}: {ex.Message}");
+            Log.Error($"Error fetching card by ID {cardId}", e);
         }
 
         return card;
@@ -188,9 +190,9 @@ public class CardsRepository
                 conn.Close();
             }
         }
-        catch (Exception ex)
+        catch (Exception e)
         {
-            Console.WriteLine($"Error fetching cards for userId {userId}: {ex.Message}");
+            Log.Error($"Error fetching cards for userId {userId}", e);
         }
         return cardsList;
     }
@@ -222,14 +224,14 @@ public class CardsRepository
                 }
             }
         }
-        catch (Exception ex)
+        catch (Exception e)
         {
-            Console.WriteLine($"Error checking deck configuration: {ex.Message}");
+            Log.Error($"An error occured while checking deck configuration", e);
             return false; // Indicate that an error occurred
         }
 
         if (validCards == deckSize) return true; // The deck configuration is valid
-        Console.WriteLine($"Error checking deck configuration: Deck size must be exactly {deckSize}.");
+        Log.Error($"Error checking deck configuration: Deck size must be exactly {deckSize}.");
         return false;
 
     }
@@ -253,9 +255,9 @@ public class CardsRepository
                 }
             }
         }
-        catch (Exception ex)
+        catch (Exception e)
         {
-            Console.WriteLine($"Error configuring Deck: {ex.Message}");
+            Log.Error($"An error occured while configuring Deck", e);
         }
     }
 
@@ -276,9 +278,9 @@ public class CardsRepository
                 conn.Close();
             }
         }
-        catch (Exception ex)
+        catch (Exception e)
         {
-            Console.WriteLine($"Error resetting deck for user {userId}: {ex.Message}");
+            Log.Error($"An error while resetting deck for user {userId}", e);
         }
     }
 
@@ -312,9 +314,9 @@ public class CardsRepository
                 conn.Close();
             }
         }
-        catch (Exception ex)
+        catch (Exception e)
         {
-            Console.WriteLine($"Error fetching card by ID {cardId}: {ex.Message}");
+            Log.Error($"An error occured while fetching card by ID {cardId}", e);
         }
 
         return null;
@@ -343,9 +345,9 @@ public class CardsRepository
                     conn.Close();
                 }
             }
-            catch (Exception ex)
+            catch (Exception e)
             {
-                Console.WriteLine($"Error fetching card by ID {cardId}: {ex.Message}");
+                Log.Error($"An error occured while fetching card by ID {cardId}", e);
             }
         }
         return null;
@@ -379,9 +381,9 @@ public class CardsRepository
                 conn.Close();
             }
         }
-        catch (Exception ex)
+        catch (Exception e)
         {
-            Console.WriteLine($"Error updating usage for user {userId} and card {userCardCardId}: {ex.Message}");
+            Log.Error($"Error updating usage for user {userId} and card {userCardCardId}", e);
         }
     }
     
