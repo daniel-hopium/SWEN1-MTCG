@@ -2,10 +2,9 @@
 using System.Net.Sockets;
 using System.Text;
 using System.Web;
-using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using static Transversal.Utils.Logger;
+using Transversal.Utils;
 
 namespace API.HttpServer
 {
@@ -75,7 +74,7 @@ namespace API.HttpServer
             
             Headers = headers.ToArray();
 
-            LogInfo($"Received: {Method} {Path}");
+            Log.Info($"Received: {Method} {Path}");
         }
 
 
@@ -168,7 +167,7 @@ namespace API.HttpServer
             _Client.Close();
             _Client.Dispose();
 
-            LogInfo($"Replying: {status} - {payload} - Duration: {duration.TotalMilliseconds} ms");
+            Log.Info($"Replying: {status} - {payload} - Duration: {duration.TotalMilliseconds} ms");
         }
 
         private bool IsJson(string payload)

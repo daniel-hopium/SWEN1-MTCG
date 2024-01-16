@@ -51,7 +51,7 @@ public class DatabaseManager
         {
             Console.WriteLine(e);
         }
-        Logger.LogInfo("Database setup complete");
+        Log.Info("Database setup complete");
     }
     
     //  Check if database is already setup

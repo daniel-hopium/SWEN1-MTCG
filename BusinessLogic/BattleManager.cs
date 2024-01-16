@@ -1,7 +1,7 @@
 ﻿using DataAccess.Daos;
-using static Transversal.Utils.Logger;
+using static Transversal.Utils.Log;
 
-namespace BusinessLogic.Utils;
+namespace BusinessLogic;
 
 class BattleManager
 {
@@ -19,7 +19,7 @@ class BattleManager
                 // If no available battles, create a new one
                 battle = new Battle();
                 _battles.Add(battle);
-                LogThread($"Battle created.");
+                InfoWithThread($"Battle created.");
             }
 
             // Join the battle

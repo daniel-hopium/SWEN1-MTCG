@@ -1,7 +1,9 @@
 ﻿using BusinessLogic.Exceptions;
 using BusinessLogic.Mapper;
 using DataAccess.Repository;
+using Microsoft.Extensions.Logging;
 using Transversal.Entities;
+using Transversal.Utils;
 using static DataAccess.Repository.CardsRepository.Usage;
 
 namespace BusinessLogic.Services;
@@ -46,7 +48,7 @@ public class TradingService
         }
         catch (Exception e)
         {
-            Console.WriteLine(e);
+            Log.Error("An error occured while creating a trade.", e);
             throw;
         }
     }
